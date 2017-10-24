@@ -2,6 +2,7 @@ package pdigital
 
 import (
 	"context"
+	"errors"
 	"time"
 )
 
@@ -113,4 +114,11 @@ const (
 	Catalog
 	Search
 	Hidden
+)
+
+// Errors from service
+var (
+	ErrInconsistentIDs = errors.New("inconsistent IDs")
+	ErrAlreadyExists   = errors.New("already exists")
+	ErrNotFound        = errors.New("not found")
 )
