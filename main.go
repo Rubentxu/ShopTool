@@ -20,7 +20,7 @@ func main() {
 	fmt.Println("ListenAndServe url: ", *httpAddr)
 	var logger log.Logger
 	{
-		logger = log.NewLogfmtLogger(os.Stderr)
+		logger = log.NewLogfmtLogger(os.Stdout)
 		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
@@ -28,7 +28,7 @@ func main() {
 	var s prod.ProductService
 	{
 		s, _ = prod.NewProductService()
-		// s = shoptool.LoggingMiddleware(logger)(s)
+		s = prod.LoggingMiddleware(logger)(s)
 	}
 
 	var h http.Handler
