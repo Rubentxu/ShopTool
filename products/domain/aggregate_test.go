@@ -1,9 +1,7 @@
 package domain
 
 import (
-	"context"
 	"errors"
-	"reflect"
 	"testing"
 	"time"
 
@@ -20,9 +18,22 @@ func TestAggregateHandleCommand(t *testing.T) {
 
 	id := eh.NewUUID()
 	cases := map[string]struct {
-		agg *AggregateProduct
-		cmd eh.Command
+		agg             *AggregateProduct
+		cmd             eh.Command
 		expectedfEvents []eh.Event
-		expectedErr error
+		expectedErr     error
+	}{
+		"unknown command": {
+			&Aggregate{
+				AggregateBase: events.NewAggregateBase(AggregateType, id),
+				created:       true,
+			},
+			&mocks.Command{
+				ID:      id,
+				Content: "testcontent",
+			},
+			nil,
+			errors.New("could not handle command: Command"),
+		},
 	}
 }
