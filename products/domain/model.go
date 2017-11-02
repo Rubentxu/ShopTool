@@ -29,3 +29,17 @@ type Product struct {
 	CreateAt     time.Time      `json:"created_at" bson:"created_at"`
 	UpdateAt     time.Time      `json:"updated_at" bson:"updated_at"`
 }
+
+var _ = eh.Entity(&Product{})
+var _ = eh.Versionable(&Product{})
+
+// EntityID implements the EntityID method of the eventhorizon.Entity interface.
+func (p *Product) EntityID() eh.UUID {
+	return p.ID
+}
+
+// AggregateVersion implements the AggregateVersion method of the
+// eventhorizon.Versionable interface.
+func (p *Product) AggregateVersion() int {
+	return p.Version
+}

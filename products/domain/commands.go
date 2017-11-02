@@ -13,19 +13,22 @@ const (
 	AddProductLangCommand = eh.CommandType("product:addProductLang")
 )
 
+// Static type check that the eventhorizon.Command interface is implemented.
+var _ = eh.Command(&AddProductLang{})
+
 // AddProductLang to Product
 type AddProductLang struct {
-	ProductID        eh.UUID `json:"id" bson:"id"`
-	Name             string  `json:"name" bson:"name"`
-	Description      string  `json:"description" bson:"description"`
-	DescriptionShort string  `json:"description_short" bson:"description_short"`
-	LinkRewrite      string  `json:"link_rewrite" bson:"link_rewrite"`
-	MetaDescription  string  `json:"meta_description" bson:"meta_description"`
-	MetaKeywords     string  `json:"meta_keywords" bson:"meta_keywords"`
-	MetaTitle        string  `json:"meta_title" bson:"meta_title"`
-	AvailableNow     string  `json:"available_now" bson:"available_now"`
-	AvailableLater   string  `json:"available_later" bson:"available_later"`
-	LangCode         string  `json:"lang_code" bson:"lang_code"`
+	ProductID        eh.UUID `json:"id"`
+	Name             string  `json:"name"`
+	Description      string  `json:"description"`
+	DescriptionShort string  `json:"description_short"`
+	LinkRewrite      string  `json:"link_rewrite"`
+	MetaDescription  string  `json:"meta_description"`
+	MetaKeywords     string  `json:"meta_keywords"`
+	MetaTitle        string  `json:"meta_title"`
+	AvailableNow     string  `json:"available_now"`
+	AvailableLater   string  `json:"available_later"`
+	LangCode         string  `json:"lang_code"`
 }
 
 // AggregateType type for AddProductLang
