@@ -125,4 +125,5 @@ func NewHandler(dbURL string) (*Handler, error) {
 		CommandHandler: loggingHandler,
 		Repo:           productRepo,
 	}, nil
+
 }
