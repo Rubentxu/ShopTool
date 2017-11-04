@@ -1,14 +1,14 @@
 package domain
 
 import (
-	"errors"
+	"context"
+	"reflect"
 	"testing"
 	"time"
 
-	//"github.com/kr/pretty"
+	"github.com/kr/pretty"
 	eh "github.com/looplab/eventhorizon"
 	"github.com/looplab/eventhorizon/aggregatestore/events"
-	"github.com/looplab/eventhorizon/mocks"
 )
 
 func TestAggregateHandleCommand(t *testing.T) {
@@ -18,22 +18,69 @@ func TestAggregateHandleCommand(t *testing.T) {
 
 	id := eh.NewUUID()
 	cases := map[string]struct {
-		agg             *AggregateProduct
-		cmd             eh.Command
-		expectedfEvents []eh.Event
-		expectedErr     error
+		agg            *AggregateProduct
+		cmd            eh.Command
+		expectedEvents []eh.Event
+		expectedErr    error
 	}{
-		"unknown command": {
-			&Aggregate{
-				AggregateBase: events.NewAggregateBase(AggregateType, id),
-				created:       true,
+		"addProductLang": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
 			},
-			&mocks.Command{
-				ID:      id,
-				Content: "testcontent",
+			&AddProductLang{
+				ProductID: id,
+				ProductLang: &ProductLang{
+					Name:             "testName",
+					Description:      "testDescription",
+					DescriptionShort: "testDescriptionShort",
+					LinkRewrite:      "testLinkRewrite",
+					MetaDescription:  "testMetaDescription",
+					MetaKeywords:     "testMetaKeywords",
+					MetaTitle:        "testMetaTitle",
+					AvailableNow:     "testAvailableNow",
+					AvailableLater:   "testAvailableLater",
+					LangCode:         "testLangCode",
+				},
+			},
+			[]eh.Event{
+				eh.NewEventForAggregate(ProductLangAdded, &ProductLangAddedData{
+					ProductLang: &ProductLang{
+						Name:             "testName",
+						Description:      "testDescription",
+						DescriptionShort: "testDescriptionShort",
+						LinkRewrite:      "testLinkRewrite",
+						MetaDescription:  "testMetaDescription",
+						MetaKeywords:     "testMetaKeywords",
+						MetaTitle:        "testMetaTitle",
+						AvailableNow:     "testAvailableNow",
+						AvailableLater:   "testAvailableLater",
+						LangCode:         "testLangCode",
+					},
+				}, TimeNow(), AggregateProductType, id, 1),
 			},
 			nil,
-			errors.New("could not handle command: Command"),
 		},
 	}
+
+	for name, tc := range cases {
+		name, tc := name, tc
+		t.Run(name, func(t *testing.T) {
+			t.Parallel()
+			err := tc.agg.HandleCommand(context.Background(), tc.cmd)
+			if (err != nil && tc.expectedErr == nil) ||
+				(err == nil && tc.expectedErr != nil) ||
+				(err != nil && tc.expectedErr != nil && err.Error() != tc.expectedErr.Error()) {
+				t.Errorf("test case '%s': incorrect error", name)
+				t.Log("exp:", tc.expectedErr)
+				t.Log("got:", err)
+			}
+			events := tc.agg.Events()
+			if !reflect.DeepEqual(events, tc.expectedEvents) {
+				t.Errorf("test case '%s': incorrect events", name)
+				t.Log("exp:\n", pretty.Sprint(tc.expectedEvents))
+				t.Log("got:\n", pretty.Sprint(events))
+			}
+		})
+	}
+
 }

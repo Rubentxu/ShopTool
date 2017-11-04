@@ -7,8 +7,7 @@ import (
 )
 
 // ProductLang for product
-type ProductLang struct {
-	ID               int    `json:"id" bson:"id"`
+type ProductLang struct {	
 	Name             string `json:"name" bson:"name"`
 	Description      string `json:"description" bson:"description"`
 	DescriptionShort string `json:"description_short" bson:"description_short"`
