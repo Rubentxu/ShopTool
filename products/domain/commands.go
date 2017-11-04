@@ -22,8 +22,8 @@ var _ = eh.Command(&RemoveProductLang{})
 
 // AddProductLang to Product
 type AddProductLang struct {
-	*ProductLang
-	ProductID eh.UUID `json:"id"`
+	ProductLang `json:"productLang"`
+	ProductID   eh.UUID `json:"id"`
 }
 
 // AggregateType type for AddProductLang

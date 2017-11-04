@@ -2,6 +2,7 @@ package products
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
 	"log"
 	"net/http"
@@ -35,6 +36,23 @@ type Logger struct{}
 func (l *Logger) Notify(ctx context.Context, event eh.Event) error {
 	log.Printf("EVENT %s", event)
 	return nil
+}
+
+// UUIDHandler Get productid
+func UUIDHandler() http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "GET" {
+			http.Error(w, "unsuported method: "+r.Method, http.StatusMethodNotAllowed)
+			return
+		}
+		uuid := eh.NewUUID()
+		b, err := json.Marshal(uuid)
+		if err != nil {
+			http.Error(w, "could not encode result: "+err.Error(), http.StatusInternalServerError)
+			return
+		}
+		w.Write(b)
+	})
 }
 
 // NewHandler sets up the full Event Horizon domain for the shoptool app and
@@ -87,6 +105,7 @@ func NewHandler(dbURL string) (*Handler, error) {
 
 	// Handle the API.
 	h := http.NewServeMux()
+	h.Handle("/api/product/id", UUIDHandler())
 	h.Handle("/api/events/", httputils.EventBusHandler(eventPublisher))
 	h.Handle("/api/product/", httputils.QueryHandler(productRepo))
 	h.Handle("/api/product/prodlang/add", httputils.CommandHandler(loggingHandler, domain.AddProductLangCommand))

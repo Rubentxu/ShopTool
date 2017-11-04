@@ -36,8 +36,8 @@ type AggregateProduct struct {
 func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) error {
 	switch cmd := cmd.(type) {
 	case *AddProductLang:
-		productLangData := &ProductLang{}
-		*productLangData = *cmd.ProductLang
+		productLangData := ProductLang{}
+		productLangData = cmd.ProductLang
 		a.StoreEvent(ProductLangAdded, &ProductLangAddedData{
 			ProductLang: productLangData,
 		}, TimeNow())
@@ -76,7 +76,7 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 			}
 		}
 		productLangData := ProductLang{}
-		productLangData = *data.ProductLang
+		productLangData = data.ProductLang
 		a.productLangs = append(a.productLangs, productLangData)
 
 	case ProductLangUpdated:

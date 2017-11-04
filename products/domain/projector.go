@@ -35,7 +35,7 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 			model.ProductLangs = []*ProductLang{}
 		}
 
-		model.ProductLangs = append(model.ProductLangs, data.ProductLang)
+		model.ProductLangs = append(model.ProductLangs, &data.ProductLang)
 	}
 	model.Version++
 	model.UpdateAt = TimeNow()

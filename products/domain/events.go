@@ -25,7 +25,7 @@ func init() {
 
 // ProductLangAddedData is the event data for the ProductLangAdded
 type ProductLangAddedData struct {
-	*ProductLang
+	ProductLang
 }
 
 // ProductLangUpdatedData is the event data for the ProductLangUpdate
