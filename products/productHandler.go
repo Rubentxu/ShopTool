@@ -152,6 +152,40 @@ var upgrader = websocket.Upgrader{
 	},
 }
 
+// EventDef definition event
+type EventDef struct {
+	eventType     string
+	data          eh.EventData
+	timestamp     string
+	aggregateType string
+	aggregateID   string
+	version       string
+}
+
+func (e *EventDef) MarshalJSON() ([]byte, error) {
+	m := make(map[string]string)
+	m["eventType"] = e.eventType
+	data, _ := json.Marshal(e.data)
+	m["data"] = string(data)
+	m["aggregateType"] = e.aggregateType
+	m["aggregateID"] = e.aggregateID
+	m["version"] = e.version
+	return json.Marshal(m)
+}
+
+// NewEvenDef eventDef
+func NewEvenDef(event eh.Event) *EventDef {
+	//time, _ := event.Timestamp().MarshalJSON()
+	return &EventDef{
+		eventType:     string(event.EventType()),
+		data:          event.Data(),
+		aggregateType: string(event.AggregateType()),
+		aggregateID:   string(event.AggregateID()),
+		version:       string(event.Version()),
+	}
+
+}
+
 // EventBusHandler is a Websocket handler for eventhorizon.Events. Events will
 // be forwarded to all requests that have been upgraded to websockets.
 // TODO: Send events as JSON.
@@ -175,7 +209,12 @@ func EventBusHandler(eventPublisher eh.EventPublisher) http.Handler {
 		}
 
 		for event := range observer.EventCh {
-			if err := c.WriteMessage(websocket.TextMessage, []byte(event.String())); err != nil {
+			eventString, err := NewEvenDef(event).MarshalJSON()
+			if err != nil {
+				fmt.Printf("Error parseo evento %s\n", err.Error())
+			}
+			fmt.Printf("evento json %s\n", eventString)
+			if err := c.WriteMessage(websocket.TextMessage, []byte(string(eventString))); err != nil {
 				log.Println("write:", err)
 				break
 			}
