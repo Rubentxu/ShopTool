@@ -7,7 +7,7 @@ import (
 )
 
 // ProductLang for product
-type ProductLang struct {	
+type ProductLang struct {
 	Name             string `json:"name" bson:"name"`
 	Description      string `json:"description" bson:"description"`
 	DescriptionShort string `json:"description_short" bson:"description_short"`
@@ -25,8 +25,8 @@ type Product struct {
 	ID           eh.UUID        `json:"id" bson:"id"`
 	Version      int            `json:"version" bson:"version"`
 	ProductLangs []*ProductLang `json:"productLangs" bson:"productLangs"`
-	CreateAt     time.Time      `json:"created_at" bson:"created_at"`
-	UpdateAt     time.Time      `json:"updated_at" bson:"updated_at"`
+	CreatedAt    time.Time      `json:"created_at" bson:"created_at"`
+	UpdatedAt    time.Time      `json:"updated_at" bson:"updated_at"`
 }
 
 var _ = eh.Entity(&Product{})

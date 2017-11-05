@@ -19,25 +19,42 @@ func (p *ProductProjector) ProjectorType() projector.Type {
 
 // Project implements the Project method of the eventhorizon.Projector interface.
 func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity eh.Entity) (eh.Entity, error) {
+	println("Projector project")
 	model, ok := entity.(*Product)
 	if !ok {
-		return nil, errors.New("model is of incorrect typel7l")
+		return nil, errors.New("model is of incorrect type")
 	}
 
 	switch event.EventType() {
+	case ProductCreated:
+		println("Projector ProductCreated")
+		// Set the ID when first created.
+		model.ID = event.AggregateID()
+		model.ProductLangs = []*ProductLang{} // Prevents "null" in JSON.
+		model.CreatedAt = TimeNow()
+	case ProductDeleted:
+		// Return nil as the entity to delete the model.
+		return nil, nil
 	case ProductLangAdded:
+		println("Projector ProductLangAdded")
 		data, ok := event.Data().(*ProductLangAddedData)
 		if !ok {
 			return nil, errors.New("invalid event data ProductLangAdded")
 		}
-		model.ID = event.AggregateID()
-		if model.ProductLangs == nil {
-			model.ProductLangs = []*ProductLang{}
-		}
-
-		model.ProductLangs = append(model.ProductLangs, &data.ProductLang)
+		model.ProductLangs = append(model.ProductLangs, &ProductLang{
+			Name:             data.Name,
+			Description:      data.Description,
+			DescriptionShort: data.DescriptionShort,
+			LinkRewrite:      data.LinkRewrite,
+			MetaDescription:  data.MetaDescription,
+			MetaKeywords:     data.MetaKeywords,
+			MetaTitle:        data.MetaTitle,
+			AvailableNow:     data.AvailableNow,
+			AvailableLater:   data.AvailableLater,
+			LangCode:         data.LangCode,
+		})
 	}
 	model.Version++
-	model.UpdateAt = TimeNow()
+	model.UpdatedAt = TimeNow()
 	return model, nil
 }

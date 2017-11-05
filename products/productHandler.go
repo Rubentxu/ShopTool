@@ -93,28 +93,28 @@ func NewHandler(dbURL string) (*Handler, error) {
 	if err != nil {
 		return nil, fmt.Errorf("could not create invitation repository: %s", err)
 	}
-	repo.SetEntityFactory(func() eh.Entity { return &domain.AggregateProduct{} })
+	repo.SetEntityFactory(func() eh.Entity { return &domain.Product{} })
 	productRepo := version.NewRepo(repo)
 
 	// Create the read model projector.
 	projector := projector.NewEventHandler(&domain.ProductProjector{}, productRepo)
 	projector.SetEntityFactory(func() eh.Entity { return &domain.Product{} })
+	eventBus.AddHandler(projector, domain.ProductCreated)
+	eventBus.AddHandler(projector, domain.ProductDeleted)
 	eventBus.AddHandler(projector, domain.ProductLangAdded)
 	eventBus.AddHandler(projector, domain.ProductLangUpdated)
 	eventBus.AddHandler(projector, domain.ProductLangRemove)
 
 	// Handle the API.
 	h := http.NewServeMux()
-	h.Handle("/api/product/id", UUIDHandler())
 	h.Handle("/api/events/", httputils.EventBusHandler(eventPublisher))
 	h.Handle("/api/product/", httputils.QueryHandler(productRepo))
+	h.Handle("/api/product/create", httputils.CommandHandler(loggingHandler, domain.CreateProductCommand))
+	h.Handle("/api/product/remove", httputils.CommandHandler(loggingHandler, domain.DeleteProductCommand))
 	h.Handle("/api/product/prodlang/add", httputils.CommandHandler(loggingHandler, domain.AddProductLangCommand))
 	h.Handle("/api/product/prodlang/update", httputils.CommandHandler(loggingHandler, domain.UpdateProductLangCommand))
 	h.Handle("/api/product/prodlang/remove", httputils.CommandHandler(loggingHandler, domain.RemoveProductLangCommand))
 
-	// Proxy to elm-reactor, which must be running. For development.
-
-	// Simple HTTP request logging.
 	logger := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.Method, r.URL)
 		h.ServeHTTP(w, r)
