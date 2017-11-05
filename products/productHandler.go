@@ -9,6 +9,7 @@ import (
 
 	"shopTool/products/domain"
 
+	"github.com/gorilla/websocket"
 	eh "github.com/looplab/eventhorizon"
 	"github.com/looplab/eventhorizon/aggregatestore/events"
 	"github.com/looplab/eventhorizon/commandhandler/aggregate"
@@ -107,7 +108,7 @@ func NewHandler(dbURL string) (*Handler, error) {
 
 	// Handle the API.
 	h := http.NewServeMux()
-	h.Handle("/api/events/", httputils.EventBusHandler(eventPublisher))
+	h.Handle("/api/events/", EventBusHandler(eventPublisher))
 	h.Handle("/api/product/", httputils.QueryHandler(productRepo))
 	h.Handle("/api/product/create", httputils.CommandHandler(loggingHandler, domain.CreateProductCommand))
 	h.Handle("/api/product/remove", httputils.CommandHandler(loggingHandler, domain.DeleteProductCommand))
@@ -126,4 +127,58 @@ func NewHandler(dbURL string) (*Handler, error) {
 		Repo:           productRepo,
 	}, nil
 
+}
+
+// Observer is a simple event handler for observing events.
+type Observer struct {
+	EventCh chan eh.Event
+}
+
+// Notify implements the Notify method of the EventObserver interface.
+func (o *Observer) Notify(ctx context.Context, event eh.Event) error {
+	select {
+	case o.EventCh <- event:
+	default:
+		log.Println("missed event:", event)
+	}
+	return nil
+}
+
+var upgrader = websocket.Upgrader{
+	ReadBufferSize:  1024,
+	WriteBufferSize: 1024,
+	CheckOrigin: func(r *http.Request) bool {
+		return true
+	},
+}
+
+// EventBusHandler is a Websocket handler for eventhorizon.Events. Events will
+// be forwarded to all requests that have been upgraded to websockets.
+// TODO: Send events as JSON.
+func EventBusHandler(eventPublisher eh.EventPublisher) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		c, err := upgrader.Upgrade(w, r, nil)
+
+		if err != nil {
+			log.Print("upgrade:", err)
+			return
+		}
+		defer c.Close()
+
+		observer := &Observer{
+			EventCh: make(chan eh.Event, 10),
+		}
+		eventPublisher.AddObserver(observer)
+
+		if err := c.WriteMessage(websocket.TextMessage, []byte("conectado a websocket")); err != nil {
+			log.Println("write:", err)
+		}
+
+		for event := range observer.EventCh {
+			if err := c.WriteMessage(websocket.TextMessage, []byte(event.String())); err != nil {
+				log.Println("write:", err)
+				break
+			}
+		}
+	})
 }

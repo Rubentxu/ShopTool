@@ -1,0 +1,28 @@
+package: shopTool
+import:
+- package: github.com/go-kit/kit
+  version: ~0.6.0
+  subpackages:
+  - endpoint
+  - log
+  - transport/http
+- package: github.com/gorilla/mux
+  version: ~1.5.0
+- package: github.com/looplab/eventhorizon
+  subpackages:
+  - aggregatestore/events
+  - commandhandler/aggregate
+  - eventbus/local
+  - eventhandler/projector
+  - eventstore/mongodb
+  - httputils
+  - publisher/local
+  - repo/mongodb
+  - repo/version
+- package: gopkg.in/mgo.v2
+  subpackages:
+  - bson
+- package: github.com/spf13/viper
+  version: v1.0.0
+testImport:
+- package: github.com/kr/pretty

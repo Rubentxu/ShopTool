@@ -1,54 +1,65 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"net/http"
 	"os"
 	prod "shopTool/products"
 
 	"github.com/go-kit/kit/log"
+	"github.com/spf13/viper"
 )
 
-func main() {
-	var (
-		httpAddr  = flag.String("http.addr", ":8081", "HTTP listen address")
-		mongoAddr = flag.String("mongo.addr", "localhost", "mongoDb address")
-	)
-	flag.Parse()
-	fmt.Println("ListenAndServe url: ", *httpAddr)
-	fmt.Println("mongoDb url: ", *mongoAddr)
+type productConfig struct {
+	serverHost string
+	serverPort string
+	dbHost     string
+	dbPort     string
+}
 
+func (c *productConfig) mongoAddr() string {
+	return fmt.Sprintf("%s:%s", c.dbHost, c.dbPort)
+}
+
+func (c *productConfig) serverAddr() string {
+	return fmt.Sprintf("%s:%s", c.serverHost, c.serverPort)
+}
+
+func config() (*productConfig, error) {
+	viper.SetConfigType("yaml")
+	viper.SetConfigName("application")     // name of config file (without extension)
+	viper.AddConfigPath("/etc/shopTool/")  // path to look for the config file in
+	viper.AddConfigPath("$HOME/.shopTool") // call multiple times to add many search paths
+	viper.AddConfigPath(".")
+	viper.AddConfigPath("../")  // optionally look for config in the working directory
+	err := viper.ReadInConfig() // Find and read the config file
+	if err != nil {             // Handle errors reading the config file
+		return nil, fmt.Errorf("Fatal error config file: %s ", err)
+	}
+	println("config files")
+	return &productConfig{
+		serverHost: viper.GetString("microservices.products.server.host"),
+		serverPort: viper.GetString("microservices.products.server.port"),
+		dbHost:     viper.GetString("microservices.products.database.host"),
+		dbPort:     viper.GetString("microservices.products.database.port"),
+	}, nil
+
+}
+
+func main() {
 	var logger log.Logger
 	{
 		logger = log.NewLogfmtLogger(os.Stdout)
 		logger = log.With(logger, "ts", log.DefaultTimestampUTC)
 		logger = log.With(logger, "caller", log.DefaultCaller)
 	}
-	/*
-		var s prod.ProductService
-		{
-			s, _ = prod.NewProductService()
-			s = prod.LoggingMiddleware(logger)(s)
-		}
-
-		var h http.Handler
-		{
-			h = prod.MakeHTTPHandler(s, log.With(logger, "component", "HTTP"))
-		}
-
-		errs := make(chan error)
-		go func() {
-			c := make(chan os.Signal)
-			signal.Notify(c, syscall.SIGINT, syscall.SIGTERM)
-			errs <- fmt.Errorf("%s", <-c)
-		}() */
-
-	/* 	go func() {
-		logger.Log("transport", "HTTP", "addr", *httpAddr)
-		errs <- http.ListenAndServe(*httpAddr, h)
-	}() */
-	h, _ := prod.NewHandler(*mongoAddr)
-	logger.Log(http.ListenAndServe(*httpAddr, h))
+	config, err := config()
+	if err != nil { // Handle errors reading the config file
+		panic(err)
+	}
+	fmt.Printf("server address %s\n", config.serverAddr())
+	fmt.Printf("mongo address %s\n", config.mongoAddr())
+	h, _ := prod.NewHandler(config.mongoAddr())
+	logger.Log(http.ListenAndServe(config.serverAddr(), h))
 
 }
