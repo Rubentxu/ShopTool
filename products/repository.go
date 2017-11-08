@@ -19,7 +19,7 @@ func NewProductRepository() (p ProductRepository, err error) {
 		log.Fatalf("[MongoDB Session]: %s\n", err)
 		return repo, err
 	}
-	collection := session.DB("shoptool").C("products")
+	collection := session.DB("ShopTool").C("products")
 	collection.RemoveAll(nil)
 	repo = ProductRepository{
 		C: collection,

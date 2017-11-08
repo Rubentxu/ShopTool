@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	prod "shopTool/products"
+	prod "ShopTool/products" // import "github.com/Rubentxu/ShopTool/products"
 
 	"github.com/go-kit/kit/log"
 	"github.com/spf13/viper"
@@ -28,8 +28,8 @@ func (c *productConfig) serverAddr() string {
 func config() (*productConfig, error) {
 	viper.SetConfigType("yaml")
 	viper.SetConfigName("application")     // name of config file (without extension)
-	viper.AddConfigPath("/etc/shopTool/")  // path to look for the config file in
-	viper.AddConfigPath("$HOME/.shopTool") // call multiple times to add many search paths
+	viper.AddConfigPath("/etc/ShopTool/")  // path to look for the config file in
+	viper.AddConfigPath("$HOME/.ShopTool") // call multiple times to add many search paths
 	viper.AddConfigPath(".")
 	viper.AddConfigPath("../")  // optionally look for config in the working directory
 	err := viper.ReadInConfig() // Find and read the config file

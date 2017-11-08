@@ -7,7 +7,7 @@ import (
 	"log"
 	"net/http"
 
-	"shopTool/products/domain"
+	"ShopTool/products/domain" // import "github.com/Rubentxu/ShopTool/products/domain"
 
 	"github.com/gorilla/websocket"
 	eh "github.com/looplab/eventhorizon"
@@ -22,7 +22,7 @@ import (
 	"github.com/looplab/eventhorizon/repo/version"
 )
 
-// Handler is a http.Handler for the shoptool app.
+// Handler is a http.Handler for the ShopTool app.
 type Handler struct {
 	http.Handler
 
@@ -56,12 +56,12 @@ func UUIDHandler() http.Handler {
 	})
 }
 
-// NewHandler sets up the full Event Horizon domain for the shoptool app and
+// NewHandler sets up the full Event Horizon domain for the ShopTool app and
 // returns a handler exposing some of the components.
 func NewHandler(dbURL string) (*Handler, error) {
 
 	// Create the event store.
-	eventStore, err := eventstore.NewEventStore(dbURL, "shoptool")
+	eventStore, err := eventstore.NewEventStore(dbURL, "")
 	if err != nil {
 		return nil, fmt.Errorf("could not create event store: %s", err)
 	}
@@ -90,7 +90,7 @@ func NewHandler(dbURL string) (*Handler, error) {
 		return commandHandler.HandleCommand(ctx, cmd)
 	})
 	// Create the repository and wrap in a version repository.
-	repo, err := repo.NewRepo(dbURL, "shoptool", "product")
+	repo, err := repo.NewRepo(dbURL, "ShopTool", "product")
 	if err != nil {
 		return nil, fmt.Errorf("could not create invitation repository: %s", err)
 	}

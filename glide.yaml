@@ -1,4 +1,4 @@
-package: shopTool
+package: ShopTool
 import:
 - package: github.com/go-kit/kit
   version: ~0.6.0

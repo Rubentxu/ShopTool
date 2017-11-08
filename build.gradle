@@ -1,0 +1,21 @@
+buildscript {
+  repositories {
+    maven {
+      url "https://plugins.gradle.org/m2/"
+    }
+  }
+
+  dependencies {
+    classpath "de.flachnetz:golang-gradle-plugin:0.1.44"
+  }
+}
+
+apply plugin: "de.flachnetz.golang-gradle-plugin"
+
+golang {
+  binaryName = "main"
+  goVersion = "1.9"
+  cgoEnabled = true
+// include = ["**/*.go", ...]
+// exclude = ["**/vendor/**", ...]
+}
