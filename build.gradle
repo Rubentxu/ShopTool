@@ -1,21 +1,47 @@
-buildscript {
-  repositories {
-    maven {
-      url "https://plugins.gradle.org/m2/"
+plugins {
+  id 'com.github.blindpirate.gogradle' version '0.7.0'
+}
+
+
+golang {
+  packagePath = 'ShopTool'
+
+}
+
+repositories {
+   golang {
+    root ~/github\.com\/[\w-]+\/[\w-]+/
+    url { path->
+      def split = path.split('/')
+      "https://github.com/${split[1]}/${split[2]}"
     }
   }
-
-  dependencies {
-    classpath "de.flachnetz:golang-gradle-plugin:0.1.44"
+  golang {
+    root ~/git\.apache\.org\/thrift\.git\/lib\/go\/thrift/
+    url  "https://github.com/apache/thrift/tree/master/lib/go/thrift/"
   }
 }
 
-apply plugin: "de.flachnetz.golang-gradle-plugin"
 
-golang {
-  binaryName = "main"
-  goVersion = "1.9"
-  cgoEnabled = true
-// include = ["**/*.go", ...]
-// exclude = ["**/vendor/**", ...]
+dependencies {
+  golang {
+    build('github.com/apache/thrift/'){
+      exclude name:'common'
+      exclude name:'gen/stress'
+      exclude name:'gen/thrifttest'
+      exclude name:'git.apache.org/thrift.git/lib/go/thrift'
+      exclude name:'shared'
+      exclude name:'thrift'
+      exclude name:'tutorial'
+    }
+  }
+}
+
+
+build.dependsOn check
+
+build {
+  //outputLocation = './ShopTool${GOEXE}'
+targetPlatform = ['linux-amd64', 'windows-amd64', 'darwin-amd64']
+  go 'build -o ./build/ShopTool_${GOOS}_${GOARCH}${GOEXE} ./'
 }

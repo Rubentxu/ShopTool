@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"os"
-	prod "ShopTool/products" // import "github.com/Rubentxu/ShopTool/products"
+	prod "ShopTool/products" // import "github.com/Rubentxu/ShopTool"
 
 	"github.com/go-kit/kit/log"
 	"github.com/spf13/viper"
