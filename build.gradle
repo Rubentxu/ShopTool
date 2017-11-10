@@ -1,47 +1,56 @@
 plugins {
-  id 'com.github.blindpirate.gogradle' version '0.7.0'
+    id 'com.github.blindpirate.gogradle' version '0.7.0'
 }
 
-
 golang {
-  packagePath = 'ShopTool'
-
+    packagePath = 'ShopTool'
 }
 
 repositories {
-   golang {
-    root ~/github\.com\/[\w-]+\/[\w-]+/
-    url { path->
-      def split = path.split('/')
-      "https://github.com/${split[1]}/${split[2]}"
+    golang {
+        root ~/github\.com\/[\w-]+\/[\w-]+/
+        url { path ->
+            def split = path.split('/')
+            "https://github.com/${split[1]}/${split[2]}"
+        }
     }
-  }
-  golang {
-    root ~/git\.apache\.org\/thrift\.git\/lib\/go\/thrift/
-    url  "https://github.com/apache/thrift/tree/master/lib/go/thrift/"
-  }
+    golang {
+        root ~/git\.apache\.org\/thrift\.git\/lib\/go\/thrift/
+        url "https://github.com/apache/thrift/tree/master/lib/go/thrift/"
+    }
 }
 
+version '0.0.1'
 
 dependencies {
-  golang {
-    build('github.com/apache/thrift/'){
-      exclude name:'common'
-      exclude name:'gen/stress'
-      exclude name:'gen/thrifttest'
-      exclude name:'git.apache.org/thrift.git/lib/go/thrift'
-      exclude name:'shared'
-      exclude name:'thrift'
-      exclude name:'tutorial'
+    golang {
+        build('github.com/apache/thrift/') {
+            exclude name: 'common'
+            exclude name: 'gen/stress'
+            exclude name: 'gen/thrifttest'
+            exclude name: 'git.apache.org/thrift.git/lib/go/thrift'
+            exclude name: 'shared'
+            exclude name: 'thrift'
+            exclude name: 'tutorial'
+        }
     }
-  }
 }
 
+def targets = ['linux-amd64']
+def env = ext.properties.getOrDefault('env','dev')
+if( env == 'prod') {
+    targets = ['linux-amd64', 'windows-amd64', 'darwin-amd64']
+}
 
-build.dependsOn check
+task copyProperties(type: Copy) {
+    description = "Copy Dockerfile and required data to build directory"
+    from 'application.yml'
+    into { "${buildDir}" }
+}
 
 build {
-  //outputLocation = './ShopTool${GOEXE}'
-targetPlatform = ['linux-amd64', 'windows-amd64', 'darwin-amd64']
-  go 'build -o ./build/ShopTool_${GOOS}_${GOARCH}${GOEXE} ./'
+    targetPlatform = targets
+    go 'build -o ./build/ShopTool_${GOOS}_${GOARCH}${GOEXE} ./'
 }
+//build.dependsOn check
+build.dependsOn copyProperties

@@ -92,7 +92,7 @@ type UpdateProductLang struct {
 	AvailableNow     string  `json:"available_now"`
 	AvailableLater   string  `json:"available_later"`
 	LangCode         string  `json:"lang_code"`
-	ProductID    eh.UUID `json:"id"`
+	ProductID        eh.UUID `json:"id"`
 }
 
 // AggregateType type for UpdateProductLang

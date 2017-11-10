@@ -18,3 +18,5 @@ vendor/
 glide.lock
 .gradle
 .gogradle/
+*.iml
+.idea/vcs.xml

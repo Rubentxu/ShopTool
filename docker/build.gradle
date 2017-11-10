@@ -1,0 +1,66 @@
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:3.2.0'
+    }
+}
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+import com.bmuschko.gradle.docker.tasks.image.Dockerfile
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+
+task createDockerfile(type: Dockerfile) {
+    destFile = project.file("$project.rootDir/build/Dockerfile")
+    from 'ubuntu:16.04'
+    maintainer 'Rubentxu "rubentxu74@gmail.com"'
+    exposePort { 8081 }
+    addFile('./ShopTool_linux_amd64', 'ShopTool')
+    addFile('./application.yml', 'application.yml')
+
+    //runCommand 'systemctl start mongod.service'
+    runCommand 'ls -ltra'
+    runCommand 'chmod +x ShopTool'
+    defaultCommand 'ShopTool'
+
+}
+
+task buildShopToolImage(type: DockerBuildImage) {
+    dependsOn createDockerfile
+    inputDir = createDockerfile.destFile.parentFile
+    tag = "rubentxu/shoptool:${rootProject.version}".toString()
+}
+
+task createMongoContainer(type: DockerCreateContainer) {
+    targetImageId { 'mongo:3.4.8' }
+    containerName "shoptoolMongo"
+}
+
+task createShopToolContainer(type: DockerCreateContainer, dependsOn: [createMongoContainer, buildShopToolImage]) {
+    targetImageId { buildShopToolImage.getImageId() }
+    portBindings = ['8081:8081']
+
+    doFirst{
+        links = [ "${createMongoContainer.getContainerId()}" ] // `database` there will be host used by application to DB connect
+    }
+
+
+}
+
+task startShopToolContainer(type: DockerStartContainer, dependsOn: createShopToolContainer) {
+    targetContainerId { createShopToolContainer.getContainerId() }
+}
+
+task stopShopToolContainer(type: DockerStopContainer) {
+    targetContainerId { createShopToolContainer.getContainerId() }
+}
+
+task functionalTestShopTool(type: Test, dependsOn: startShopToolContainer) {
+    finalizedBy stopShopToolContainer
+}
