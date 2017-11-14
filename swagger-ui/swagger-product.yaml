@@ -1,0 +1,169 @@
+swagger: '2.0'
+info:
+  description: Esta es la definicion de la api de ShopTool para microservicios de producto.
+  version: 1.0.0
+  title: Microservicio Producto
+  contact:
+    email: rubentxu74@gmail.com
+  license:
+    name: Apache 2.0
+    url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
+host: 'localhost:8081'
+basePath: /api
+tags:
+  - name: producto
+    description: modulo producto
+schemes:
+  - http
+paths:
+  /product/command/create:
+    post:
+      tags:
+        - Comandos
+      summary: crea un nuevo producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            CreateProductCommand
+          required: true
+          schema:
+            $ref: '#/definitions/CreateProductCommand'
+      responses:
+        '400':
+          description: Comando no valido
+  /product/command/remove:
+    post:
+      tags:
+        - Comandos
+      summary: elimina un nuevo producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            DeleteProductCommand
+          required: true
+          schema:
+            $ref: '#/definitions/DeleteProductCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/prodlang/add:
+    post:
+      tags:
+        - Comandos
+      summary: añade una definicion de indioma al producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            AddProductLangCommand
+          required: true
+          schema:
+            $ref: '#/definitions/AddProductLangCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/prodlang/update:
+    post:
+      tags:
+        - Comandos
+      summary: actualiza una definicion en un indioma del producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            UpdateProductLangCommand
+          required: true
+          schema:
+            $ref: '#/definitions/UpdateProductLangCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+definitions:
+  CreateProductCommand:
+    type: object
+    properties:
+      reference:
+        type: string
+      ean_13:
+        type: string
+      isbn:
+        type: string
+      upc:
+        type: string
+  DeleteProductCommand:
+    type: object
+    properties:
+      id:
+        type: string
+  AddProductLangCommand:
+    type: object
+    properties:
+      id:
+        type: string
+      productLang:
+        $ref: '#/definitions/ProductLang'
+  UpdateProductLangCommand:
+    type: object
+    properties:
+      id:
+        type: string
+      productLang:
+        $ref: '#/definitions/ProductLang'
+  ProductLang:
+    type: object
+    properties:
+      name:
+        type: string
+      description:
+        type: string
+      description_short:
+        type: string
+      link_rewrite:
+        type: string
+      meta_description:
+        type: string
+      meta_keywords:
+        type: string
+      meta_title:
+        type: string
+      available_now:
+        type: string
+      available_later:
+        type: string
+      lang_code:
+        type: string
+externalDocs:
+  description: Find out more about Swagger
+  url: 'http://swagger.io'

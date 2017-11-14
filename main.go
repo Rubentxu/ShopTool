@@ -60,6 +60,7 @@ func main() {
 	fmt.Printf("server address %s\n", config.serverAddr())
 	fmt.Printf("mongo address %s\n", config.mongoAddr())
 	h, _ := prod.NewHandler(config.mongoAddr())
+
 	logger.Log(http.ListenAndServe(config.serverAddr(), h))
 
 }
