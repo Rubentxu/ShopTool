@@ -45,7 +45,7 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 	default:
 		// All other events require the aggregate to be created.
 		if !a.created {
-			return errors.New("not created")
+			return errors.New("product not exist")
 		}
 	}
 
@@ -60,15 +60,15 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 	case *Delete:
 		a.StoreEvent(ProductDeleted, nil, TimeNow())
 	case *AddProductLang:
-		a.StoreEvent(LangAdded, &LangAddedData{
+		a.StoreEvent(ProductLangAdded, &ProductLangAddedData{
 			ProductLang : cmd.ProductLang,
 		}, TimeNow())
 	case *UpdateProductLang:
-		a.StoreEvent(LangUpdated, &LangUpdatedData{
+		a.StoreEvent(ProductLangUpdated, &ProductLangUpdatedData{
 			ProductLang : cmd.ProductLang,
 		}, TimeNow())
 	case *RemoveProductLang:
-		a.StoreEvent(LangRemove, &LangRemoveData{
+		a.StoreEvent(ProductLangRemove, &ProductLangRemoveData{
 			LangCode: cmd.LangCode,
 		}, TimeNow())
 	case *SetAvailability:
@@ -91,8 +91,8 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 	case ProductDeleted:
 		a.created = false
 		println("remove product event")
-	case LangAdded:
-		data, ok := event.Data().(*LangAddedData)
+	case ProductLangAdded:
+		data, ok := event.Data().(*ProductLangAddedData)
 		if !ok {
 			return errors.New("Invalid event data for ProductLangAdded")
 		}
@@ -106,9 +106,9 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 
 		a.productLangs = append(a.productLangs, data.ProductLang)
 		println("added productLang event")
-	case LangUpdated:
+	case ProductLangUpdated:
 		println("updated productLang event")
-		data, ok := event.Data().(*LangUpdatedData)
+		data, ok := event.Data().(*ProductLangUpdatedData)
 		if !ok {
 			return errors.New("Invalid event data for ProductLangUpdated")
 		}
@@ -129,11 +129,11 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		}
 		a.productLangs = append(a.productLangs, data.ProductLang)
 
-	case LangRemove:
+	case ProductLangRemove:
 		println("remove productLang event")
-		data, ok := event.Data().(*LangRemoveData)
+		data, ok := event.Data().(*ProductLangRemoveData)
 		if !ok {
-			return errors.New("Invalid event data for ProductLangUpdated")
+			return errors.New("Invalid event data for ProductLangRemove")
 		}
 		if a.productLangs == nil {
 			return errors.New("ProductLang for langCode not exist")

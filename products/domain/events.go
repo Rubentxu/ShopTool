@@ -8,9 +8,9 @@ import (
 const (
 	ProductCreated     = eh.EventType("product:created")
 	ProductDeleted     = eh.EventType("product:deleted")
-	LangAdded   = eh.EventType("product:langAdded")
-	LangUpdated = eh.EventType("product:langUpdated")
-	LangRemove  = eh.EventType("product:langRemove")
+	ProductLangAdded   = eh.EventType("product:productLangAdded")
+	ProductLangUpdated = eh.EventType("product:productLangUpdated")
+	ProductLangRemove  = eh.EventType("product:productLangRemove")
 	AvailabilitySet    = eh.EventType("product:availability")
 )
 
@@ -18,14 +18,14 @@ func init() {
 	eh.RegisterEventData(ProductCreated, func() eh.EventData {
 		return &CreateData{}
 	})
-	eh.RegisterEventData(LangAdded, func() eh.EventData {
-		return &LangAddedData{}
+	eh.RegisterEventData(ProductLangAdded, func() eh.EventData {
+		return &ProductLangAddedData{}
 	})
-	eh.RegisterEventData(LangUpdated, func() eh.EventData {
-		return &LangUpdatedData{}
+	eh.RegisterEventData(ProductLangUpdated, func() eh.EventData {
+		return &ProductLangUpdatedData{}
 	})
-	eh.RegisterEventData(LangRemove, func() eh.EventData {
-		return &LangRemoveData{}
+	eh.RegisterEventData(ProductLangRemove, func() eh.EventData {
+		return &ProductLangRemoveData{}
 	})
 	eh.RegisterEventData(AvailabilitySet, func() eh.EventData {
 		return &AvailabilityData{}
@@ -41,18 +41,18 @@ type CreateData struct {
 	Upc       string `json:"upc" bson:"upc"`
 }
 
-// LangAddedData is the event data for the LangAdded
-type LangAddedData struct {
+// ProductLangAddedData is the event data for the ProductLangAdded
+type ProductLangAddedData struct {
 	ProductLang
 }
 
-// LangUpdatedData is the event data for the ProductLangUpdate
-type LangUpdatedData struct {
+// ProductLangUpdatedData is the event data for the ProductProductLangUpdate
+type ProductLangUpdatedData struct {
 	ProductLang
 }
 
-// LangRemoveData is the event data for the LangRemove
-type LangRemoveData struct {
+// ProductLangRemoveData is the event data for the ProductLangRemove
+type ProductLangRemoveData struct {
 	LangCode string `json:"lang_code" bson:"lang_code"`
 }
 

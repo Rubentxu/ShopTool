@@ -18,9 +18,9 @@ func init() {
 const (
 	CreateProductCommand     = eh.CommandType("product:create")
 	DeleteProductCommand     = eh.CommandType("product:delete")
-	AddLangCommand    = eh.CommandType("product:addLang")
-	UpdateLangCommand = eh.CommandType("product:updateLang")
-	RemoveLangCommand = eh.CommandType("product:removeLang")
+	AddProductLangCommand    = eh.CommandType("product:addProductLang")
+	UpdateProductLangCommand = eh.CommandType("product:updateProductLang")
+	RemoveProductLangCommand = eh.CommandType("product:removeProductLang")
 	SetAvailabilityCommand   = eh.CommandType("product:setAvailability")
 )
 
@@ -76,7 +76,7 @@ func (c *AddProductLang) AggregateType() eh.AggregateType { return AggregateProd
 func (c *AddProductLang) AggregateID() eh.UUID { return c.ProductID }
 
 // CommandType type for AddProductLang
-func (c *AddProductLang) CommandType() eh.CommandType { return AddLangCommand }
+func (c *AddProductLang) CommandType() eh.CommandType { return AddProductLangCommand }
 
 // UpdateProductLang to Product
 type UpdateProductLang struct {
@@ -91,7 +91,7 @@ func (c *UpdateProductLang) AggregateType() eh.AggregateType { return AggregateP
 func (c *UpdateProductLang) AggregateID() eh.UUID { return c.ProductID }
 
 // CommandType type for UpdateProductLang
-func (c *UpdateProductLang) CommandType() eh.CommandType { return UpdateLangCommand }
+func (c *UpdateProductLang) CommandType() eh.CommandType { return UpdateProductLangCommand }
 
 // RemoveProductLang with langcode
 type RemoveProductLang struct {
@@ -106,7 +106,7 @@ func (c *RemoveProductLang) AggregateType() eh.AggregateType { return AggregateP
 func (c *RemoveProductLang) AggregateID() eh.UUID { return c.ProductID }
 
 // CommandType type for RemoveProductLang
-func (c *RemoveProductLang) CommandType() eh.CommandType { return RemoveLangCommand }
+func (c *RemoveProductLang) CommandType() eh.CommandType { return RemoveProductLangCommand }
 
 // SetAvailability definición de disponibilidad de producto
 type SetAvailability struct {

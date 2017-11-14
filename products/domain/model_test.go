@@ -18,6 +18,10 @@ func TestModelProductJSON(t *testing.T) {
 	p := &Product{
 		ID:      id,
 		Version: 1,
+		Reference: "1234565¡a",
+		Ean13: "ean13",
+		Isbn: "978-84",
+		Upc: "",
 		ProductLangs: []*ProductLang{
 			&ProductLang{
 				Name:             "Pantalones Monoles",
@@ -53,7 +57,7 @@ func TestModelProductJSON(t *testing.T) {
 
 	var expectedJSONStr = []byte(`
 {
-   "id": "` + id.String() + `",
+	"id": "` + id.String() + `",
    "version":1,
    "productLangs":[
       {
@@ -77,14 +81,18 @@ func TestModelProductJSON(t *testing.T) {
       "out_of_stock bson":false,
       "active":true,
       "available_for_order":true,
-      "available_date":"` + now.Format(time.RFC3339Nano) + `",
+      "available_date": "` + now.Format(time.RFC3339Nano) + `",
       "visibility":0,
       "date_add":"` + now.Format(time.RFC3339Nano) + `",
       "date_upd":"` + now.Format(time.RFC3339Nano) + `",
       "quantity_discount":false
    },
-   "created_at": "` + now.Format(time.RFC3339Nano) + `",
-   "updated_at": "` + now.Format(time.RFC3339Nano) + `"
+   "reference":"1234565¡a",
+   "ean_13":"ean13",
+   "isbn":"978-84",
+   "upc":"",
+   "created_at":"` + now.Format(time.RFC3339Nano) + `",
+   "updated_at":"` + now.Format(time.RFC3339Nano) + `"
 }`)
 	expectedJSON := new(bytes.Buffer)
 	if err := json.Compact(expectedJSON, expectedJSONStr); err != nil {

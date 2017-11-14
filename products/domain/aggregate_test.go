@@ -9,6 +9,7 @@ import (
 	"github.com/kr/pretty"
 	eh "github.com/looplab/eventhorizon"
 	"github.com/looplab/eventhorizon/aggregatestore/events"
+	"errors"
 )
 
 func TestAggregateHandleCommand(t *testing.T) {
@@ -48,6 +49,44 @@ func TestAggregateHandleCommand(t *testing.T) {
 			},
 			nil,
 		},
+		"createError": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : true,
+			},
+			&Create{
+				Reference: "abcd1234",
+				Ean13:     "123456789",
+				Isbn:      "",
+				Upc:       "",
+			},
+			nil,
+			errors.New("already created"),
+		},
+		"delete": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : true,
+			},
+			&Delete{
+				ID: id,
+			},
+			[]eh.Event{
+				eh.NewEventForAggregate(ProductDeleted, nil, TimeNow(), AggregateProductType, id, 1),
+			},
+			nil,
+		},
+		"deleteNotCreated": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : false,
+			},
+			&Delete{
+				ID: id,
+			},
+			nil,
+			errors.New("product not exist"),
+		},
 		"addProductLang": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
@@ -69,7 +108,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 				},
 			},
 			[]eh.Event{
-				eh.NewEventForAggregate(LangAdded, &LangAddedData{
+				eh.NewEventForAggregate(ProductLangAdded, &ProductLangAddedData{
 					ProductLang: ProductLang{
 						Name:             "testName",
 						Description:      "testDescription",
@@ -81,6 +120,116 @@ func TestAggregateHandleCommand(t *testing.T) {
 						AvailableNow:     "testAvailableNow",
 						AvailableLater:   "testAvailableLater",
 						LangCode:         "testLangCode",
+					},
+				}, TimeNow(), AggregateProductType, id, 1),
+			},
+			nil,
+		},
+		"updateProductLang": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : true,
+			},
+			&UpdateProductLang{
+				ProductID: id,
+				ProductLang: ProductLang{
+					Name:             "testName",
+					Description:      "testDescription",
+					DescriptionShort: "testDescriptionShort",
+					LinkRewrite:      "testLinkRewrite",
+					MetaDescription:  "testMetaDescription",
+					MetaKeywords:     "testMetaKeywords",
+					MetaTitle:        "testMetaTitle",
+					AvailableNow:     "testAvailableNow",
+					AvailableLater:   "testAvailableLater",
+					LangCode:         "testLangCode",
+				},
+			},
+			[]eh.Event{
+				eh.NewEventForAggregate(ProductLangUpdated, &ProductLangUpdatedData{
+					ProductLang: ProductLang{
+						Name:             "testName",
+						Description:      "testDescription",
+						DescriptionShort: "testDescriptionShort",
+						LinkRewrite:      "testLinkRewrite",
+						MetaDescription:  "testMetaDescription",
+						MetaKeywords:     "testMetaKeywords",
+						MetaTitle:        "testMetaTitle",
+						AvailableNow:     "testAvailableNow",
+						AvailableLater:   "testAvailableLater",
+						LangCode:         "testLangCode",
+					},
+				}, TimeNow(), AggregateProductType, id, 1),
+			},
+			nil,
+		},
+		"removeProductLang": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : true,
+			},
+			&RemoveProductLang{
+				LangCode :  "Es_es",
+				ProductID: id,
+
+			},
+			[]eh.Event{
+				eh.NewEventForAggregate(ProductLangRemove, &ProductLangRemoveData{
+					LangCode: "Es_es",
+				}, TimeNow(), AggregateProductType, id, 1),
+			},
+			nil,
+		},
+		"removeProductLangNotCreated": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : false,
+			},
+			&RemoveProductLang{
+				LangCode :  "Es_es",
+				ProductID: id,
+
+			},
+			nil,
+			errors.New("product not exist"),
+		},
+		"setAvailability": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : true,
+			},
+			&SetAvailability{
+				Availability: Availability{
+					Quantity:          0,
+					MinimalQuantity:   0,
+					OnlineOnly:        false,
+					OnSale:            false,
+					OutOfStock:        false,
+					Active:            false,
+					AvailableForOrder: false,
+					AvailableDate:     TimeNow(),
+					Visibility:        0,
+					DateAdd:           TimeNow(),
+					DateUpd:           TimeNow(),
+					QuantityDiscount:  false,
+				},
+				ProductID: "",
+			},
+			[]eh.Event{
+				eh.NewEventForAggregate(AvailabilitySet, &AvailabilityData{
+					Availability: Availability{
+						Quantity:          0,
+						MinimalQuantity:   0,
+						OnlineOnly:        false,
+						OnSale:            false,
+						OutOfStock:        false,
+						Active:            false,
+						AvailableForOrder: false,
+						AvailableDate:     TimeNow(),
+						Visibility:        0,
+						DateAdd:           TimeNow(),
+						DateUpd:           TimeNow(),
+						QuantityDiscount:  false,
 					},
 				}, TimeNow(), AggregateProductType, id, 1),
 			},
