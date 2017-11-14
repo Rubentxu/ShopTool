@@ -110,11 +110,11 @@ func NewHandler(dbURL string) (*Handler, error) {
 	h := http.NewServeMux()
 	h.Handle("/api/events/", EventBusHandler(eventPublisher))
 	h.Handle("/api/product/", httputils.QueryHandler(productRepo))
-	h.Handle("/api/product/create", httputils.CommandHandler(loggingHandler, domain.CreateProductCommand))
-	h.Handle("/api/product/remove", httputils.CommandHandler(loggingHandler, domain.DeleteProductCommand))
-	h.Handle("/api/product/prodlang/add", httputils.CommandHandler(loggingHandler, domain.AddProductLangCommand))
-	h.Handle("/api/product/prodlang/update", httputils.CommandHandler(loggingHandler, domain.UpdateProductLangCommand))
-	h.Handle("/api/product/prodlang/remove", httputils.CommandHandler(loggingHandler, domain.RemoveProductLangCommand))
+	h.Handle("/api/product/command/create", httputils.CommandHandler(loggingHandler, domain.CreateProductCommand))
+	h.Handle("/api/product/command/remove", httputils.CommandHandler(loggingHandler, domain.DeleteProductCommand))
+	h.Handle("/api/product/command/prodlang/add", httputils.CommandHandler(loggingHandler, domain.AddProductLangCommand))
+	h.Handle("/api/product/command/prodlang/update", httputils.CommandHandler(loggingHandler, domain.UpdateProductLangCommand))
+	h.Handle("/api/product/command/prodlang/remove", httputils.CommandHandler(loggingHandler, domain.RemoveProductLangCommand))
 
 	logger := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.Method, r.URL)

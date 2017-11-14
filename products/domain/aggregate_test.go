@@ -15,21 +15,47 @@ func TestAggregateHandleCommand(t *testing.T) {
 	TimeNow = func() time.Time {
 		return time.Date(2017, time.November, 20, 42, 0, 0, 0, time.Local)
 	}
+	idGen = func() eh.UUID {
+		return "aaabbbbcccccdddd1234"
+	}
 
-	id := eh.NewUUID()
+
+	id := idGen()
 	cases := map[string]struct {
 		agg            *AggregateProduct
 		cmd            eh.Command
 		expectedEvents []eh.Event
 		expectedErr    error
 	}{
+		"create": {
+			&AggregateProduct{
+				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+
+			},
+			&Create{
+				Reference: "abcd1234",
+				Ean13:     "123456789",
+				Isbn:      "",
+				Upc:       "",
+			},
+			[]eh.Event{
+				eh.NewEventForAggregate(ProductCreated, &CreateData{
+					Reference: "abcd1234",
+					Ean13:     "123456789",
+					Isbn:      "",
+					Upc:       "",
+				}, TimeNow(), AggregateProductType, id, 1),
+			},
+			nil,
+		},
 		"addProductLang": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
+				created : true,
 			},
 			&AddProductLang{
 				ProductID: id,
-				ProductLang: &ProductLang{
+				ProductLang: ProductLang{
 					Name:             "testName",
 					Description:      "testDescription",
 					DescriptionShort: "testDescriptionShort",
@@ -43,8 +69,8 @@ func TestAggregateHandleCommand(t *testing.T) {
 				},
 			},
 			[]eh.Event{
-				eh.NewEventForAggregate(ProductLangAdded, &ProductLangAddedData{
-					ProductLang: &ProductLang{
+				eh.NewEventForAggregate(LangAdded, &LangAddedData{
+					ProductLang: ProductLang{
 						Name:             "testName",
 						Description:      "testDescription",
 						DescriptionShort: "testDescriptionShort",

@@ -12,6 +12,7 @@ import (
 
 // TimeNow is a mockable version of time.Now.
 var TimeNow = time.Now
+var idGen = eh.NewUUID
 
 func init() {
 	eh.RegisterAggregate(func(id eh.UUID) eh.Aggregate {
@@ -27,6 +28,7 @@ const AggregateProductType = eh.AggregateType("product")
 // AggregateProduct  is an aggregate for a product.
 type AggregateProduct struct {
 	*events.AggregateBase
+	availability Availability
 	created      bool
 	productLangs []ProductLang
 }
@@ -49,38 +51,29 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 
 	switch cmd := cmd.(type) {
 	case *Create:
-		a.StoreEvent(ProductCreated, nil, TimeNow())
+		a.StoreEvent(ProductCreated, &CreateData{
+			Reference: cmd.Reference,
+			Ean13:     cmd.Ean13,
+			Isbn:      cmd.Isbn,
+			Upc:       cmd.Upc,
+		}, TimeNow())
 	case *Delete:
 		a.StoreEvent(ProductDeleted, nil, TimeNow())
 	case *AddProductLang:
-		a.StoreEvent(ProductLangAdded, &ProductLangAddedData{
-			Name:             cmd.Name,
-			Description:      cmd.Description,
-			DescriptionShort: cmd.DescriptionShort,
-			LinkRewrite:      cmd.LinkRewrite,
-			MetaDescription:  cmd.MetaDescription,
-			MetaKeywords:     cmd.MetaKeywords,
-			MetaTitle:        cmd.MetaTitle,
-			AvailableNow:     cmd.AvailableNow,
-			AvailableLater:   cmd.AvailableLater,
-			LangCode:         cmd.LangCode,
+		a.StoreEvent(LangAdded, &LangAddedData{
+			ProductLang : cmd.ProductLang,
 		}, TimeNow())
 	case *UpdateProductLang:
-		a.StoreEvent(ProductLangUpdated, &ProductLangUpdatedData{
-			Name:             cmd.Name,
-			Description:      cmd.Description,
-			DescriptionShort: cmd.DescriptionShort,
-			LinkRewrite:      cmd.LinkRewrite,
-			MetaDescription:  cmd.MetaDescription,
-			MetaKeywords:     cmd.MetaKeywords,
-			MetaTitle:        cmd.MetaTitle,
-			AvailableNow:     cmd.AvailableNow,
-			AvailableLater:   cmd.AvailableLater,
-			LangCode:         cmd.LangCode,
+		a.StoreEvent(LangUpdated, &LangUpdatedData{
+			ProductLang : cmd.ProductLang,
 		}, TimeNow())
 	case *RemoveProductLang:
-		a.StoreEvent(ProductLangRemove, &ProductLangRemoveData{
+		a.StoreEvent(LangRemove, &LangRemoveData{
 			LangCode: cmd.LangCode,
+		}, TimeNow())
+	case *SetAvailability:
+		a.StoreEvent(AvailabilitySet, &AvailabilityData{
+			Availability : cmd.Availability,
 		}, TimeNow())
 	default:
 		return fmt.Errorf("could not handle command: %s", cmd.CommandType())
@@ -98,8 +91,8 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 	case ProductDeleted:
 		a.created = false
 		println("remove product event")
-	case ProductLangAdded:
-		data, ok := event.Data().(*ProductLangAddedData)
+	case LangAdded:
+		data, ok := event.Data().(*LangAddedData)
 		if !ok {
 			return errors.New("Invalid event data for ProductLangAdded")
 		}
@@ -111,22 +104,11 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 			}
 		}
 
-		a.productLangs = append(a.productLangs, ProductLang{
-			Name:             data.Name,
-			Description:      data.Description,
-			DescriptionShort: data.DescriptionShort,
-			LinkRewrite:      data.LinkRewrite,
-			MetaDescription:  data.MetaDescription,
-			MetaKeywords:     data.MetaKeywords,
-			MetaTitle:        data.MetaTitle,
-			AvailableNow:     data.AvailableNow,
-			AvailableLater:   data.AvailableLater,
-			LangCode:         data.LangCode,
-		})
+		a.productLangs = append(a.productLangs, data.ProductLang)
 		println("added productLang event")
-	case ProductLangUpdated:
+	case LangUpdated:
 		println("updated productLang event")
-		data, ok := event.Data().(*ProductLangUpdatedData)
+		data, ok := event.Data().(*LangUpdatedData)
 		if !ok {
 			return errors.New("Invalid event data for ProductLangUpdated")
 		}
@@ -145,22 +127,11 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		if !existProductLang {
 			return errors.New("ProductLang for langCode not exist")
 		}
-		a.productLangs = append(a.productLangs, ProductLang{
-			Name:             data.Name,
-			Description:      data.Description,
-			DescriptionShort: data.DescriptionShort,
-			LinkRewrite:      data.LinkRewrite,
-			MetaDescription:  data.MetaDescription,
-			MetaKeywords:     data.MetaKeywords,
-			MetaTitle:        data.MetaTitle,
-			AvailableNow:     data.AvailableNow,
-			AvailableLater:   data.AvailableLater,
-			LangCode:         data.LangCode,
-		})
+		a.productLangs = append(a.productLangs, data.ProductLang)
 
-	case ProductLangRemove:
+	case LangRemove:
 		println("remove productLang event")
-		data, ok := event.Data().(*ProductLangRemoveData)
+		data, ok := event.Data().(*LangRemoveData)
 		if !ok {
 			return errors.New("Invalid event data for ProductLangUpdated")
 		}
@@ -179,6 +150,12 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		if removedProductLang {
 			return errors.New("ProductLang for langCode not exist")
 		}
+	case AvailabilitySet:
+		data, ok := event.Data().(*AvailabilityData)
+		if !ok {
+			return errors.New("Invalid event data for ProductLangUpdated")
+		}
+		a.availability = data.Availability
 
 	default:
 		return fmt.Errorf("could not apply event: %s", event.EventType())

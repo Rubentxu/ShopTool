@@ -8,52 +8,54 @@ import (
 const (
 	ProductCreated     = eh.EventType("product:created")
 	ProductDeleted     = eh.EventType("product:deleted")
-	ProductLangAdded   = eh.EventType("product:productlang_added")
-	ProductLangUpdated = eh.EventType("product:productlang_updated")
-	ProductLangRemove  = eh.EventType("product:productlang_remove")
+	LangAdded   = eh.EventType("product:langAdded")
+	LangUpdated = eh.EventType("product:langUpdated")
+	LangRemove  = eh.EventType("product:langRemove")
+	AvailabilitySet    = eh.EventType("product:availability")
 )
 
 func init() {
-	eh.RegisterEventData(ProductLangAdded, func() eh.EventData {
-		return &ProductLangAddedData{}
+	eh.RegisterEventData(ProductCreated, func() eh.EventData {
+		return &CreateData{}
 	})
-	eh.RegisterEventData(ProductLangUpdated, func() eh.EventData {
-		return &ProductLangUpdatedData{}
+	eh.RegisterEventData(LangAdded, func() eh.EventData {
+		return &LangAddedData{}
 	})
-	eh.RegisterEventData(ProductLangRemove, func() eh.EventData {
-		return &ProductLangRemoveData{}
+	eh.RegisterEventData(LangUpdated, func() eh.EventData {
+		return &LangUpdatedData{}
 	})
+	eh.RegisterEventData(LangRemove, func() eh.EventData {
+		return &LangRemoveData{}
+	})
+	eh.RegisterEventData(AvailabilitySet, func() eh.EventData {
+		return &AvailabilityData{}
+	})
+
 }
 
-// ProductLangAddedData is the event data for the ProductLangAdded
-type ProductLangAddedData struct {
-	Name             string `json:"name" bson:"name"`
-	Description      string `json:"description" bson:"description"`
-	DescriptionShort string `json:"description_short" bson:"description_short"`
-	LinkRewrite      string `json:"link_rewrite" bson:"link_rewrite"`
-	MetaDescription  string `json:"meta_description" bson:"meta_description"`
-	MetaKeywords     string `json:"meta_keywords" bson:"meta_keywords"`
-	MetaTitle        string `json:"meta_title" bson:"meta_title"`
-	AvailableNow     string `json:"available_now" bson:"available_now"`
-	AvailableLater   string `json:"available_later" bson:"available_later"`
-	LangCode         string `json:"lang_code" bson:"lang_code"`
+// CreateData is the event data for the Product
+type CreateData struct {
+	Reference string `json:"reference" bson:"reference"`
+	Ean13     string `json:"ean_13" bson:"ean_13"`
+	Isbn      string `json:"isbn" bson:"isbn"`
+	Upc       string `json:"upc" bson:"upc"`
 }
 
-// ProductLangUpdatedData is the event data for the ProductLangUpdate
-type ProductLangUpdatedData struct {
-	Name             string `json:"name" bson:"name"`
-	Description      string `json:"description" bson:"description"`
-	DescriptionShort string `json:"description_short" bson:"description_short"`
-	LinkRewrite      string `json:"link_rewrite" bson:"link_rewrite"`
-	MetaDescription  string `json:"meta_description" bson:"meta_description"`
-	MetaKeywords     string `json:"meta_keywords" bson:"meta_keywords"`
-	MetaTitle        string `json:"meta_title" bson:"meta_title"`
-	AvailableNow     string `json:"available_now" bson:"available_now"`
-	AvailableLater   string `json:"available_later" bson:"available_later"`
-	LangCode         string `json:"lang_code" bson:"lang_code"`
+// LangAddedData is the event data for the LangAdded
+type LangAddedData struct {
+	ProductLang
 }
 
-// ProductLangRemoveData is the event data for the ProductLangRemove
-type ProductLangRemoveData struct {
+// LangUpdatedData is the event data for the ProductLangUpdate
+type LangUpdatedData struct {
+	ProductLang
+}
+
+// LangRemoveData is the event data for the LangRemove
+type LangRemoveData struct {
 	LangCode string `json:"lang_code" bson:"lang_code"`
+}
+
+type AvailabilityData struct {
+	Availability
 }

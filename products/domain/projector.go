@@ -35,9 +35,9 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 	case ProductDeleted:
 		// Return nil as the entity to delete the model.
 		return nil, nil
-	case ProductLangAdded:
+	case LangAdded:
 		println("Projector ProductLangAdded")
-		data, ok := event.Data().(*ProductLangAddedData)
+		data, ok := event.Data().(*LangAddedData)
 		if !ok {
 			return nil, errors.New("invalid event data ProductLangAdded")
 		}
@@ -53,6 +53,12 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 			AvailableLater:   data.AvailableLater,
 			LangCode:         data.LangCode,
 		})
+	case AvailabilitySet:
+		data, ok := event.Data().(*AvailabilityData)
+		if !ok {
+			return nil, errors.New("Invalid event data for ProductLangUpdated")
+		}
+		model.Availability = data.Availability
 	}
 	model.Version++
 	model.UpdatedAt = TimeNow()
