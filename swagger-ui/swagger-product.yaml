@@ -2,7 +2,7 @@ swagger: '2.0'
 info:
   description: Esta es la definicion de la api de ShopTool para microservicios de producto.
   version: 1.0.0
-  title: Microservicio Producto
+  title: Definicion de apis de ShopTool
   contact:
     email: rubentxu74@gmail.com
   license:
@@ -10,9 +10,6 @@ info:
     url: 'http://www.apache.org/licenses/LICENSE-2.0.html'
 host: 'localhost:8081'
 basePath: /api
-tags:
-  - name: producto
-    description: modulo producto
 schemes:
   - http
 paths:
@@ -20,7 +17,7 @@ paths:
     post:
       tags:
         - Comandos
-      summary: crea un nuevo producto
+      summary: Crea un nuevo producto
       description: ''
       consumes:
         - application/json
@@ -42,7 +39,7 @@ paths:
     post:
       tags:
         - Comandos
-      summary: elimina un nuevo producto
+      summary: Elimina un nuevo producto
       description: ''
       consumes:
         - application/json
@@ -66,7 +63,7 @@ paths:
     post:
       tags:
         - Comandos
-      summary: añade una definicion de indioma al producto
+      summary: Añade una definicion de idioma al producto
       description: ''
       consumes:
         - application/json
@@ -77,10 +74,10 @@ paths:
           name: body
           description: >-
             Necesitamos definir los parametros para el comando
-            AddProductLangCommand
+            AddProductLangCommand, el id es del producto
           required: true
           schema:
-            $ref: '#/definitions/AddProductLangCommand'
+            $ref: '#/definitions/ProductLang'
       responses:
         '200':
           description: successful operation
@@ -90,7 +87,7 @@ paths:
     post:
       tags:
         - Comandos
-      summary: actualiza una definicion en un indioma del producto
+      summary: Actualiza una definicion en un idioma del producto
       description: ''
       consumes:
         - application/json
@@ -101,15 +98,100 @@ paths:
           name: body
           description: >-
             Necesitamos definir los parametros para el comando
-            UpdateProductLangCommand
+            UpdateProductLangCommand, el id es del producto
           required: true
           schema:
-            $ref: '#/definitions/UpdateProductLangCommand'
+            $ref: '#/definitions/ProductLang'
       responses:
         '200':
           description: successful operation
         '400':
           description: Comando no valido
+  /product/command/prodlang/remove:
+    post:
+      tags:
+        - Comandos
+      summary: 'Elimina una definicion en un idioma del producto, el id es del producto'
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            RemoveProductLangCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/RemoveProductLangCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/availabilityConfig:
+    post:
+      tags:
+        - Comandos
+      summary: 'Configura la disponibilidad del producto, el id es del producto'
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            SetAvailabilityCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/SetAvailabilityCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/:
+    get:
+      tags:
+        - Product
+      summary: Consulta los productos disponibles
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      responses:
+        '200':
+          description: operacion exitosa
+        '404':
+          description: recursos no encontrados
+  '/product/{productId}':
+    get:
+      tags:
+        - Product
+      summary: Consulta un producto por su id
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: path
+          name: productId
+          required: true
+          description: identificador del producto
+          schema:
+            type: string
+      responses:
+        '200':
+          description: operacion exitosa
+        '404':
+          description: recursos no encontrados
 definitions:
   CreateProductCommand:
     type: object
@@ -127,23 +209,56 @@ definitions:
     properties:
       id:
         type: string
-  AddProductLangCommand:
+        description: id del producto
+  RemoveProductLangCommand:
     type: object
     properties:
       id:
         type: string
-      productLang:
-        $ref: '#/definitions/ProductLang'
-  UpdateProductLangCommand:
+        description: id del producto
+      lang_code:
+        type: string
+  SetAvailabilityCommand:
     type: object
     properties:
       id:
         type: string
-      productLang:
-        $ref: '#/definitions/ProductLang'
+        description: id del producto
+      quantity:
+        type: integer
+      minimal_quantity:
+        type: integer
+      online_only:
+        type: boolean
+      on_sale:
+        type: boolean
+      out_of_stock:
+        type: boolean
+      active:
+        type: boolean
+      available_for_order:
+        type: boolean
+      available_date:
+        type: string
+      visibility:
+        type: string
+        enum:
+          - CATALOG
+          - SEARCH
+          - NONE
+          - BOTH
+      date_add:
+        type: string
+      date_upd:
+        type: string
+      quantity_discount:
+        type: boolean
   ProductLang:
     type: object
     properties:
+      id:
+        type: string
+        description: id del producto
       name:
         type: string
       description:
@@ -164,6 +279,7 @@ definitions:
         type: string
       lang_code:
         type: string
+        description: codigo del idioma
 externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'
