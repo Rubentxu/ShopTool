@@ -6,10 +6,10 @@ import (
 	"testing"
 	"time"
 
+	"errors"
 	"github.com/kr/pretty"
 	eh "github.com/looplab/eventhorizon"
 	"github.com/looplab/eventhorizon/aggregatestore/events"
-	"errors"
 )
 
 func TestAggregateHandleCommand(t *testing.T) {
@@ -19,7 +19,6 @@ func TestAggregateHandleCommand(t *testing.T) {
 	idGen = func() eh.UUID {
 		return "aaabbbbcccccdddd1234"
 	}
-
 
 	id := idGen()
 	cases := map[string]struct {
@@ -31,7 +30,6 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"create": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-
 			},
 			&Create{
 				Reference: "abcd1234",
@@ -52,7 +50,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"createError": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : true,
+				created:       true,
 			},
 			&Create{
 				Reference: "abcd1234",
@@ -66,7 +64,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"delete": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : true,
+				created:       true,
 			},
 			&Delete{
 				ID: id,
@@ -79,7 +77,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"deleteNotCreated": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : false,
+				created:       false,
 			},
 			&Delete{
 				ID: id,
@@ -90,7 +88,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"addProductLang": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : true,
+				created:       true,
 			},
 			&AddProductLang{
 				ProductID: id,
@@ -128,7 +126,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"updateProductLang": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : true,
+				created:       true,
 			},
 			&UpdateProductLang{
 				ProductID: id,
@@ -166,12 +164,11 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"removeProductLang": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : true,
+				created:       true,
 			},
 			&RemoveProductLang{
-				LangCode :  "Es_es",
+				LangCode:  "Es_es",
 				ProductID: id,
-
 			},
 			[]eh.Event{
 				eh.NewEventForAggregate(ProductLangRemove, &ProductLangRemoveData{
@@ -183,12 +180,11 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"removeProductLangNotCreated": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : false,
+				created:       false,
 			},
 			&RemoveProductLang{
-				LangCode :  "Es_es",
+				LangCode:  "Es_es",
 				ProductID: id,
-
 			},
 			nil,
 			errors.New("product not exist"),
@@ -196,7 +192,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 		"setAvailability": {
 			&AggregateProduct{
 				AggregateBase: events.NewAggregateBase(AggregateProductType, id),
-				created : true,
+				created:       true,
 			},
 			&SetAvailability{
 				Availability: Availability{

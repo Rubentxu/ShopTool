@@ -16,12 +16,12 @@ func TestModelProductJSON(t *testing.T) {
 	// Don't use keys for init, we want to get compiler warnings if we haven't
 	// used some fields.
 	p := &Product{
-		ID:      id,
-		Version: 1,
+		ID:        id,
+		Version:   1,
 		Reference: "1234565¡a",
-		Ean13: "ean13",
-		Isbn: "978-84",
-		Upc: "",
+		Ean13:     "ean13",
+		Isbn:      "978-84",
+		Upc:       "",
 		ProductLangs: []*ProductLang{
 			&ProductLang{
 				Name:             "Pantalones Monoles",

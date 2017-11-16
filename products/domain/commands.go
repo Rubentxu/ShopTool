@@ -34,10 +34,10 @@ var _ = eh.Command(&SetAvailability{})
 
 // Create creates a new todo list.
 type Create struct {
-	Reference string  `json:"reference"`
-	Ean13     string  `json:"ean_13"`
-	Isbn      string  `json:"isbn"`
-	Upc       string  `json:"upc"`
+	Reference string `json:"reference"`
+	Ean13     string `json:"ean_13"`
+	Isbn      string `json:"isbn"`
+	Upc       string `json:"upc"`
 }
 
 // AggregateType type for create

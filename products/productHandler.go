@@ -190,7 +190,6 @@ func NewEvenDef(event eh.Event) *EventDef {
 
 // EventBusHandler is a Websocket handler for eventhorizon.Events. Events will
 // be forwarded to all requests that have been upgraded to websockets.
-// TODO: Send events as JSON.
 func EventBusHandler(eventPublisher eh.EventPublisher) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		c, err := upgrader.Upgrade(w, r, nil)

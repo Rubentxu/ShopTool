@@ -61,11 +61,11 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 		a.StoreEvent(ProductDeleted, nil, TimeNow())
 	case *AddProductLang:
 		a.StoreEvent(ProductLangAdded, &ProductLangAddedData{
-			ProductLang : cmd.ProductLang,
+			ProductLang: cmd.ProductLang,
 		}, TimeNow())
 	case *UpdateProductLang:
 		a.StoreEvent(ProductLangUpdated, &ProductLangUpdatedData{
-			ProductLang : cmd.ProductLang,
+			ProductLang: cmd.ProductLang,
 		}, TimeNow())
 	case *RemoveProductLang:
 		a.StoreEvent(ProductLangRemove, &ProductLangRemoveData{
@@ -73,7 +73,7 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 		}, TimeNow())
 	case *SetAvailability:
 		a.StoreEvent(AvailabilitySet, &AvailabilityData{
-			Availability : cmd.Availability,
+			Availability: cmd.Availability,
 		}, TimeNow())
 	default:
 		return fmt.Errorf("could not handle command: %s", cmd.CommandType())
@@ -87,10 +87,10 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 	switch event.EventType() {
 	case ProductCreated:
 		a.created = true
-		println("create product event")
+
 	case ProductDeleted:
 		a.created = false
-		println("remove product event")
+
 	case ProductLangAdded:
 		data, ok := event.Data().(*ProductLangAddedData)
 		if !ok {
@@ -100,14 +100,12 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		for i, e := range a.productLangs {
 			println("lancode " + string(i) + " " + e.LangCode)
 			if len(a.productLangs) > 0 && e.LangCode != "" && e.LangCode == data.LangCode {
-				return errors.New("ProductLang for langCode exist -> " + e.LangCode + "::" + data.LangCode + ":" + string(len(a.productLangs)))
+				return errors.New("ProductLang for langCode exist -> " + e.LangCode + "::" + data.LangCode)
 			}
 		}
-
 		a.productLangs = append(a.productLangs, data.ProductLang)
-		println("added productLang event")
+
 	case ProductLangUpdated:
-		println("updated productLang event")
 		data, ok := event.Data().(*ProductLangUpdatedData)
 		if !ok {
 			return errors.New("Invalid event data for ProductLangUpdated")
@@ -130,7 +128,6 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		a.productLangs = append(a.productLangs, data.ProductLang)
 
 	case ProductLangRemove:
-		println("remove productLang event")
 		data, ok := event.Data().(*ProductLangRemoveData)
 		if !ok {
 			return errors.New("Invalid event data for ProductLangRemove")
