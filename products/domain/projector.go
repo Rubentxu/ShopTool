@@ -47,7 +47,7 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 		return nil, nil
 	case ProductLangAdded:
 		println("Projector ProductLangAdded")
-		data, ok := event.Data().(*ProductLangAddedData)
+		data, ok := event.Data().(*ProductLangData)
 		if !ok {
 			return nil, errors.New("invalid event data ProductLangAdded")
 		}
@@ -56,14 +56,14 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 		model.ProductLangs = append(model.ProductLangs, productLang)
 	case ProductLangUpdated:
 		println("Projector ProductLangAdded")
-		data, ok := event.Data().(*ProductLangUpdatedData)
+		data, ok := event.Data().(*ProductLangData)
 		if !ok {
 			return nil, errors.New("invalid event data ProductLangAdded")
 		}
 		productLang := &ProductLang{}
 		*productLang = *&data.ProductLang
 		model.ProductLangs = append(model.ProductLangs, productLang)
-	case ProductLangRemove:
+	case ProductLangRemoved:
 		println("Projector ProductLangAdded")
 		data, ok := event.Data().(*ProductLangRemoveData)
 		if !ok {

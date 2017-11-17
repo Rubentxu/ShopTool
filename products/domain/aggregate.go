@@ -31,6 +31,7 @@ type AggregateProduct struct {
 	availability Availability
 	created      bool
 	productLangs []ProductLang
+	transportSpecification TransportSpecification
 }
 
 // HandleCommand implements the HandleCommand method of the
@@ -60,20 +61,36 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 	case *Delete:
 		a.StoreEvent(ProductDeleted, nil, TimeNow())
 	case *AddProductLang:
-		a.StoreEvent(ProductLangAdded, &ProductLangAddedData{
+		a.StoreEvent(ProductLangAdded, &ProductLangData{
 			ProductLang: cmd.ProductLang,
 		}, TimeNow())
 	case *UpdateProductLang:
-		a.StoreEvent(ProductLangUpdated, &ProductLangUpdatedData{
+		a.StoreEvent(ProductLangUpdated, &ProductLangData{
 			ProductLang: cmd.ProductLang,
 		}, TimeNow())
 	case *RemoveProductLang:
-		a.StoreEvent(ProductLangRemove, &ProductLangRemoveData{
+		a.StoreEvent(ProductLangRemoved, &ProductLangRemoveData{
 			LangCode: cmd.LangCode,
 		}, TimeNow())
 	case *SetAvailability:
 		a.StoreEvent(AvailabilitySet, &AvailabilityData{
 			Availability: cmd.Availability,
+		}, TimeNow())
+	case *SetTransportSpecification:
+		a.StoreEvent(AvailabilitySet, &TransportSpecificationData{
+			TransportSpecification: cmd.TransportSpecification,
+		}, TimeNow())
+	case *AddTransport:
+		a.StoreEvent(AvailabilitySet, &TransporterData{
+			Transporter: cmd.Transporter,
+		}, TimeNow())
+	case *UpdateTransport:
+		a.StoreEvent(AvailabilitySet, &TransporterData{
+			Transporter: cmd.Transporter,
+		}, TimeNow())
+	case *RemoveTransport:
+		a.StoreEvent(AvailabilitySet, &TranporterRemovedData{
+			transportID: cmd.transportID,
 		}, TimeNow())
 	default:
 		return fmt.Errorf("could not handle command: %s", cmd.CommandType())
@@ -92,28 +109,27 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		a.created = false
 
 	case ProductLangAdded:
-		data, ok := event.Data().(*ProductLangAddedData)
+		data, ok := event.Data().(*ProductLangData)
 		if !ok {
-			return errors.New("Invalid event data for ProductLangAdded")
+			return fmt.Errorf("Invalid event %s for productLang %s",event.EventType(), data.LangCode)
 		}
 
 		for i, e := range a.productLangs {
-			println("lancode " + string(i) + " " + e.LangCode)
 			if len(a.productLangs) > 0 && e.LangCode != "" && e.LangCode == data.LangCode {
-				return errors.New("ProductLang for langCode exist -> " + e.LangCode + "::" + data.LangCode)
+				return  fmt.Errorf("ProductLang for langCode %s exist. ", data.LangCode)
 			}
 		}
 		a.productLangs = append(a.productLangs, data.ProductLang)
 
 	case ProductLangUpdated:
-		data, ok := event.Data().(*ProductLangUpdatedData)
+		data, ok := event.Data().(*ProductLangData)
 		if !ok {
-			return errors.New("Invalid event data for ProductLangUpdated")
+			return fmt.Errorf("Invalid event %s for productLang %s",event.EventType(), data.LangCode)
 		}
 
 		existProductLang := false
 		if a.productLangs == nil {
-			return errors.New("ProductLang for langCode not exist")
+			return fmt.Errorf("Error Event %s , langCode %s not exist",event.EventType(), data.LangCode)
 		}
 
 		for _, e := range a.productLangs {
@@ -123,17 +139,17 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		}
 
 		if !existProductLang {
-			return errors.New("ProductLang for langCode not exist")
+			return fmt.Errorf("Error Event %s , langCode %s not exist",event.EventType(), data.LangCode)
 		}
 		a.productLangs = append(a.productLangs, data.ProductLang)
 
-	case ProductLangRemove:
+	case ProductLangRemoved:
 		data, ok := event.Data().(*ProductLangRemoveData)
 		if !ok {
-			return errors.New("Invalid event data for ProductLangRemove")
+			return fmt.Errorf("Invalid event %s for productLang %s",event.EventType(), data.LangCode)
 		}
 		if a.productLangs == nil {
-			return errors.New("ProductLang for langCode not exist")
+			return fmt.Errorf("Error Event %s , langCode %s not exist",event.EventType(), data.LangCode)
 		}
 
 		removedProductLang := false
@@ -144,18 +160,77 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 				removedProductLang = true
 			}
 		}
-		if removedProductLang {
-			return errors.New("ProductLang for langCode not exist")
+		if !removedProductLang {
+			return fmt.Errorf("Error Event %s , langCode %s not exist",event.EventType(), data.LangCode)
 		}
 	case AvailabilitySet:
 		data, ok := event.Data().(*AvailabilityData)
 		if !ok {
-			return errors.New("Invalid event data for ProductLangUpdated")
+			return fmt.Errorf("Invalid event %s",event.EventType())
 		}
 		a.availability = data.Availability
+	case TransportSpecificationSet:
+		data, ok := event.Data().(*TransportSpecificationData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s",event.EventType())
+		}
+		a.transportSpecification = data.TransportSpecification
+	case TransportAdded:
+		data, ok := event.Data().(*TransporterData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for transporter %s",event.EventType(), data.Id)
+		}
+		for _, e := range a.transportSpecification.Transporters {
 
+			if len(a.productLangs) > 0 && e.Id != "" && e.Id == data.Id {
+				return fmt.Errorf("transport %s for aggretate  %s exist -> ", e.Name , a.EntityID())
+
+				}
+		}
+		a.transportSpecification.Transporters = append(a.transportSpecification.Transporters, data.Transporter)
+	case TransportUpdated:
+		data, ok := event.Data().(*TransporterData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for transporter %s",event.EventType(), data.Id)
+		}
+
+		existProductLang := false
+		if a.transportSpecification.Transporters == nil {
+			return fmt.Errorf("Transporter for %s not exist", data.Id)
+		}
+
+		for _, e := range a.transportSpecification.Transporters {
+			if e.Id == data.Id {
+				existProductLang = true
+			}
+		}
+
+		if !existProductLang {
+			return fmt.Errorf("Transporter for ID %s not exist", data.Id)
+		}
+		a.transportSpecification.Transporters = append(a.transportSpecification.Transporters, data.Transporter)
+	case TransportRemoved:
+		data, ok := event.Data().(*TranporterRemovedData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for transporter %s",event.EventType(), data.transportID)
+		}
+		if a.transportSpecification.Transporters == nil {
+			return fmt.Errorf("Invalid event %s for transporter %s",event.EventType(), data.transportID)
+		}
+
+		removedProductLang := false
+		atemp := a.transportSpecification.Transporters
+		for i, e := range atemp {
+			if e.Id == data.transportID {
+				a.transportSpecification.Transporters = atemp[:i+copy(atemp[i:], atemp[i+1:])]
+				removedProductLang = true
+			}
+		}
+		if !removedProductLang {
+			return fmt.Errorf("Transporter for ID %s not exist", data.transportID)
+		}
 	default:
-		return fmt.Errorf("could not apply event: %s", event.EventType())
+		return fmt.Errorf("Could not apply event: %s", event.EventType())
 	}
 	return nil
 }

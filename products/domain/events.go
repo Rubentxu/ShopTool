@@ -6,12 +6,16 @@ import (
 
 // Events to products
 const (
-	ProductCreated     = eh.EventType("product:created")
-	ProductDeleted     = eh.EventType("product:deleted")
-	ProductLangAdded   = eh.EventType("product:productLangAdded")
-	ProductLangUpdated = eh.EventType("product:productLangUpdated")
-	ProductLangRemove  = eh.EventType("product:productLangRemove")
-	AvailabilitySet    = eh.EventType("product:availability")
+	ProductCreated            = eh.EventType("product:created")
+	ProductDeleted            = eh.EventType("product:deleted")
+	ProductLangAdded          = eh.EventType("product:productLangAdded")
+	ProductLangUpdated        = eh.EventType("product:productLangUpdated")
+	ProductLangRemoved        = eh.EventType("product:productLangRemoved")
+	AvailabilitySet           = eh.EventType("product:availability")
+	TransportSpecificationSet = eh.EventType("product:transportSpecification")
+	TransportAdded            = eh.EventType("product:transportSpecification:transportAdded")
+	TransportUpdated          = eh.EventType("product:transportSpecification:transportUpdated")
+	TransportRemoved          = eh.EventType("product:transportSpecification:transportRemoved")
 )
 
 func init() {
@@ -19,18 +23,33 @@ func init() {
 		return &CreateData{}
 	})
 	eh.RegisterEventData(ProductLangAdded, func() eh.EventData {
-		return &ProductLangAddedData{}
+		return &ProductLangData{}
 	})
 	eh.RegisterEventData(ProductLangUpdated, func() eh.EventData {
-		return &ProductLangUpdatedData{}
+		return &ProductLangData{}
 	})
-	eh.RegisterEventData(ProductLangRemove, func() eh.EventData {
+	eh.RegisterEventData(ProductLangRemoved, func() eh.EventData {
 		return &ProductLangRemoveData{}
 	})
 	eh.RegisterEventData(AvailabilitySet, func() eh.EventData {
 		return &AvailabilityData{}
 	})
 
+	eh.RegisterEventData(TransportSpecificationSet, func() eh.EventData {
+		return &TransportSpecificationData{}
+	})
+
+	eh.RegisterEventData(TransportAdded, func() eh.EventData {
+		return &TransporterData{}
+	})
+
+	eh.RegisterEventData(TransportUpdated, func() eh.EventData {
+		return &TransporterData{}
+	})
+
+	eh.RegisterEventData(TransportRemoved, func() eh.EventData {
+		return &TranporterRemovedData{}
+	})
 }
 
 // CreateData is the event data for the Product
@@ -41,21 +60,30 @@ type CreateData struct {
 	Upc       string `json:"upc" bson:"upc"`
 }
 
-// ProductLangAddedData is the event data for the ProductLangAdded
-type ProductLangAddedData struct {
+// ProductLangData is the event data for the ProductLangAdded
+type ProductLangData struct {
 	ProductLang
 }
 
-// ProductLangUpdatedData is the event data for the ProductProductLangUpdate
-type ProductLangUpdatedData struct {
-	ProductLang
-}
 
-// ProductLangRemoveData is the event data for the ProductLangRemove
+
+// ProductLangRemoveData is the event data for the ProductLangRemoved
 type ProductLangRemoveData struct {
 	LangCode string `json:"lang_code" bson:"lang_code"`
 }
 
 type AvailabilityData struct {
 	Availability
+}
+
+type TransportSpecificationData struct {
+	 TransportSpecification
+}
+
+type TransporterData struct {
+	Transporter
+}
+
+type TranporterRemovedData struct {
+	transportID eh.UUID `json:"transport_id" bson:"transport_id"`
 }

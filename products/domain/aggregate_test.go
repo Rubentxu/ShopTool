@@ -106,7 +106,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 				},
 			},
 			[]eh.Event{
-				eh.NewEventForAggregate(ProductLangAdded, &ProductLangAddedData{
+				eh.NewEventForAggregate(ProductLangAdded, &ProductLangData{
 					ProductLang: ProductLang{
 						Name:             "testName",
 						Description:      "testDescription",
@@ -171,7 +171,7 @@ func TestAggregateHandleCommand(t *testing.T) {
 				ProductID: id,
 			},
 			[]eh.Event{
-				eh.NewEventForAggregate(ProductLangRemove, &ProductLangRemoveData{
+				eh.NewEventForAggregate(ProductLangRemoved, &ProductLangRemoveData{
 					LangCode: "Es_es",
 				}, TimeNow(), AggregateProductType, id, 1),
 			},

@@ -44,18 +44,36 @@ type Availability struct {
 	QuantityDiscount  bool       `json:"quantity_discount" bson:"quantity_discount"`
 }
 
+type Transporter struct {
+	Id eh.UUID `json:"id" bson:"id"`
+	Name string `json:"name" bson:"name"`
+	Description string `json:"description" bson:"description"`
+}
+
+type TransportSpecification struct {
+	 Width  uint8 `json:"width" bson:"width"`
+	 Height uint8 `json:"height" bson:"height"`
+	 Depth  uint8 `json:"depth" bson:"depth"`
+	 Weight uint8 `json:"weight" bson:"weight"`
+	 AdditionalShippingCost	uint8 `json:"additional_shipping_cost" bson:"additional_shipping_cost"`
+	 Transporters []Transporter `json:"transporters" bson:"transporters"`
+
+}
+
 // Product  is the read model for the product.
 type Product struct {
 	ID           eh.UUID        `json:"id" bson:"id"`
 	Version      int            `json:"version" bson:"version"`
-	ProductLangs []*ProductLang `json:"productLangs" bson:"productLangs"`
-	Availability `json:"availability" bson:"availability"`
 	Reference    string    `json:"reference" bson:"reference"`
 	Ean13        string    `json:"ean_13" bson:"ean_13"`
 	Isbn         string    `json:"isbn" bson:"isbn"`
 	Upc          string    `json:"upc" bson:"upc"`
 	CreatedAt    time.Time `json:"created_at" bson:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at" bson:"updated_at"`
+	ProductLangs []*ProductLang `json:"productLangs" bson:"productLangs"`
+	Availability `json:"availability" bson:"availability"`
+	TransportSpecification `json:"transport_specification" bson:"transport_specification"`
+
 }
 
 var _ = eh.Entity(&Product{})

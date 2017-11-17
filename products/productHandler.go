@@ -104,7 +104,7 @@ func NewHandler(dbURL string) (*Handler, error) {
 	eventBus.AddHandler(projector, domain.ProductDeleted)
 	eventBus.AddHandler(projector, domain.ProductLangAdded)
 	eventBus.AddHandler(projector, domain.ProductLangUpdated)
-	eventBus.AddHandler(projector, domain.ProductLangRemove)
+	eventBus.AddHandler(projector, domain.ProductLangRemoved)
 
 	// Handle the API.
 	h := http.NewServeMux()
