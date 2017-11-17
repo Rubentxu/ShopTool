@@ -21,7 +21,6 @@ task createDockerfile(type: Dockerfile) {
     destFile = project.file("$project.rootDir/build/Dockerfile")
     from 'ubuntu:16.04'
     maintainer 'Rubentxu "rubentxu74@gmail.com"'
-    # Install MongoDB.
     runCommand '\
       apt-key adv –keyserver hkp://keyserver.ubuntu.com:80 –recv 0C49F3730359A14518585931BC711F9BA15703C6 && \
       echo “deb [ arch=amd64,arm64 ] http://repo.mongodb.org/apt/ubuntu xenial/mongodb-org/3.4 multiverse” | sudo tee /etc/apt/sources.list.d/mongodb-org-3.4.list && \
@@ -29,11 +28,9 @@ task createDockerfile(type: Dockerfile) {
       apt-get install -y mongodb-org && \
       rm -rf /var/lib/apt/lists/*'
 
-    # Define mountable directories.
-    volume ["/data/db"]
+    volume "/data/db"
 
-    # Define working directory.
-    WORKDIR /data
+    //WORKDIR /data
     exposePort { 8081 }
     addFile('./ShopTool_linux_amd64', 'ShopTool')
     addFile('./application.yml', 'application.yml')

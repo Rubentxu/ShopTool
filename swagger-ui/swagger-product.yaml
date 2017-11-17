@@ -155,6 +155,106 @@ paths:
           description: successful operation
         '400':
           description: Comando no valido
+  /product/command/transportSpecificationConfig:
+    post:
+      tags:
+        - Comandos
+      summary: >-
+        Configura la especificacion de transporte del producto, el id es del
+        producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            SetTransportSpecificationCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/SetTransportSpecificationCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/transport/add:
+    post:
+      tags:
+        - Comandos
+      summary: 'Agrega un transportista al producto, el id es del producto'
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            AddTransportCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/TransportCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/transport/update:
+    post:
+      tags:
+        - Comandos
+      summary: >-
+        Actualiza un transportista existente en el producto, el id es del
+        producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            UpdateTransportCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/TransportCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/transport/remove:
+    post:
+      tags:
+        - Comandos
+      summary: 'Elimina un transportista existente en el producto, el id es del producto'
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            RemoveTransportCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/RemoveTransportCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
   /product/:
     get:
       tags:
@@ -280,6 +380,58 @@ definitions:
       lang_code:
         type: string
         description: codigo del idioma
+  SetTransportSpecificationCommand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del producto
+      width:
+        type: integer
+      height:
+        type: integer
+      depth:
+        type: integer
+      weight:
+        type: integer
+      additional_shipping_cost:
+        type: integer
+      transporters:
+        type: array
+        items:
+          $ref: '#/definitions/Transporter'
+  TransportCommand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del Producto
+      transporter_id:
+        type: string
+        description: id del Trasportista
+      name:
+        type: string
+      description:
+        type: string
+  Transporter:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del Trasportista
+      name:
+        type: string
+      description:
+        type: string
+  RemoveTransportCommand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del producto
+      transporter_id:
+        type: string
+        description: id del transportista
 externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'

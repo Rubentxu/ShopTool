@@ -182,7 +182,7 @@ func (c *UpdateTransport) CommandType() eh.CommandType {
 }
 
 type RemoveTransport struct {
-	transportID eh.UUID `json:"transport_id"`
+	transportID eh.UUID `json:"transporter_id"`
 	ProductID   eh.UUID `json:"id"`
 }
 

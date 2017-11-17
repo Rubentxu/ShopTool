@@ -116,6 +116,10 @@ func NewHandler(dbURL string) (*Handler, error) {
 	h.Handle("/api/product/command/prodlang/update", httputils.CommandHandler(loggingHandler, domain.UpdateProductLangCommand))
 	h.Handle("/api/product/command/prodlang/remove", httputils.CommandHandler(loggingHandler, domain.RemoveProductLangCommand))
 	h.Handle("/api/product/command/availabilityConfig", httputils.CommandHandler(loggingHandler, domain.SetAvailabilityCommand))
+	h.Handle("/api/product/command/transportSpecificationConfig", httputils.CommandHandler(loggingHandler, domain.SetTransportSpecificationCommand))
+	h.Handle("/api/product/command/transport/add", httputils.CommandHandler(loggingHandler, domain.AddTransportCommand))
+	h.Handle("/api/product/command/transport/update", httputils.CommandHandler(loggingHandler, domain.UpdateTransportCommand))
+	h.Handle("/api/product/command/transport/remove", httputils.CommandHandler(loggingHandler, domain.RemoveTransportCommand))
 	h.Handle("/api/product/docs/", http.StripPrefix("/api/product/docs/", http.FileServer(http.Dir("swagger-ui/"))))
 
 	logger := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
