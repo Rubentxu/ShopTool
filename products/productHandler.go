@@ -105,6 +105,12 @@ func NewHandler(dbURL string) (*Handler, error) {
 	eventBus.AddHandler(projector, domain.ProductLangAdded)
 	eventBus.AddHandler(projector, domain.ProductLangUpdated)
 	eventBus.AddHandler(projector, domain.ProductLangRemoved)
+	eventBus.AddHandler(projector, domain.AvailabilitySet)
+	eventBus.AddHandler(projector, domain.TransportSpecificationSet)
+	eventBus.AddHandler(projector, domain.TransportAdded)
+	eventBus.AddHandler(projector, domain.TransportUpdated)
+	eventBus.AddHandler(projector, domain.TransportRemoved)
+	eventBus.AddHandler(projector, domain.PricesSpecificationSet)
 
 	// Handle the API.
 	h := http.NewServeMux()
