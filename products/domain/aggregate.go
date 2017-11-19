@@ -32,6 +32,7 @@ type AggregateProduct struct {
 	created                bool
 	productLangs           []ProductLang
 	transportSpecification TransportSpecification
+	pricesSpecification    PricesSpecification
 }
 
 // HandleCommand implements the HandleCommand method of the
@@ -91,6 +92,10 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 	case *RemoveTransport:
 		a.StoreEvent(TransportRemoved, &TranporterRemovedData{
 			transportID: cmd.transportID,
+		}, TimeNow())
+	case *SetPricesSpecification:
+		a.StoreEvent(PricesSpecificationSet, &PricesSpecificationData{
+			PricesSpecification: cmd.PricesSpecification,
 		}, TimeNow())
 	default:
 		return fmt.Errorf("could not handle command: %s", cmd.CommandType())
@@ -229,6 +234,12 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		if !removedProductLang {
 			return fmt.Errorf("Transporter for ID %s not exist", data.transportID)
 		}
+	case PricesSpecificationSet:
+		data, ok := event.Data().(*PricesSpecificationData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s", event.EventType())
+		}
+		a.pricesSpecification = data.PricesSpecification
 	default:
 		return fmt.Errorf("Could not apply event: %s", event.EventType())
 	}

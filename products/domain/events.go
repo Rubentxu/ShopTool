@@ -16,6 +16,7 @@ const (
 	TransportAdded            = eh.EventType("product:transportSpecification:transportAdded")
 	TransportUpdated          = eh.EventType("product:transportSpecification:transportUpdated")
 	TransportRemoved          = eh.EventType("product:transportSpecification:transportRemoved")
+	PricesSpecificationSet    = eh.EventType("product:pricesSpecification")
 )
 
 func init() {
@@ -34,21 +35,20 @@ func init() {
 	eh.RegisterEventData(AvailabilitySet, func() eh.EventData {
 		return &AvailabilityData{}
 	})
-
 	eh.RegisterEventData(TransportSpecificationSet, func() eh.EventData {
 		return &TransportSpecificationData{}
 	})
-
 	eh.RegisterEventData(TransportAdded, func() eh.EventData {
 		return &TransporterData{}
 	})
-
 	eh.RegisterEventData(TransportUpdated, func() eh.EventData {
 		return &TransporterData{}
 	})
-
 	eh.RegisterEventData(TransportRemoved, func() eh.EventData {
 		return &TranporterRemovedData{}
+	})
+	eh.RegisterEventData(PricesSpecificationSet, func() eh.EventData {
+		return &PricesSpecificationData{}
 	})
 }
 
@@ -65,8 +65,6 @@ type ProductLangData struct {
 	ProductLang
 }
 
-
-
 // ProductLangRemoveData is the event data for the ProductLangRemoved
 type ProductLangRemoveData struct {
 	LangCode string `json:"lang_code" bson:"lang_code"`
@@ -77,7 +75,7 @@ type AvailabilityData struct {
 }
 
 type TransportSpecificationData struct {
-	 TransportSpecification
+	TransportSpecification
 }
 
 type TransporterData struct {
@@ -86,4 +84,8 @@ type TransporterData struct {
 
 type TranporterRemovedData struct {
 	transportID eh.UUID `json:"transport_id" bson:"transport_id"`
+}
+
+type PricesSpecificationData struct {
+	PricesSpecification
 }

@@ -120,6 +120,7 @@ func NewHandler(dbURL string) (*Handler, error) {
 	h.Handle("/api/product/command/transport/add", httputils.CommandHandler(loggingHandler, domain.AddTransportCommand))
 	h.Handle("/api/product/command/transport/update", httputils.CommandHandler(loggingHandler, domain.UpdateTransportCommand))
 	h.Handle("/api/product/command/transport/remove", httputils.CommandHandler(loggingHandler, domain.RemoveTransportCommand))
+	h.Handle("/api/product/command/pricesSpecification", httputils.CommandHandler(loggingHandler, domain.SetPricesSpecificationCommand))
 	h.Handle("/api/product/docs/", http.StripPrefix("/api/product/docs/", http.FileServer(http.Dir("swagger-ui/"))))
 
 	logger := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {

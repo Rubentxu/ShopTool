@@ -142,6 +142,12 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 		if !removedProductLang {
 			return nil, fmt.Errorf("Transporter for ID %s not exist", data.transportID)
 		}
+	case PricesSpecificationSet:
+		data, ok := event.Data().(*PricesSpecificationData)
+		if !ok {
+			return nil, fmt.Errorf("Invalid event %s", event.EventType())
+		}
+		model.PricesSpecification = data.PricesSpecification
 	}
 
 	model.Version++

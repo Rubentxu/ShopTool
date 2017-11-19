@@ -255,6 +255,32 @@ paths:
           description: successful operation
         '400':
           description: Comando no valido
+  /product/command/pricesSpecification:
+    post:
+      tags:
+        - Comandos
+      summary: >-
+        Configura la especificacion de precios en el producto, el id es del
+        producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            SetPricesSpecificationCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/SetPricesSpecificationCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
   /product/:
     get:
       tags:
@@ -432,6 +458,40 @@ definitions:
       transporter_id:
         type: string
         description: id del transportista
+  SetPricesSpecificationCommand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del producto
+      id_taxt_rules_group:
+        type: string
+      price:
+        type: integer
+      whole_sale_price:
+        type: integer
+      unit_price_ratio:
+        type: string
+      show_price:
+        type: boolean
+      priorities_for_rules:
+        type: array
+        items:
+          type: string
+      ecotax:
+        type: integer
+      price_currency:
+        type: string
+      valid_from:
+        type: string
+      valid_through:
+        type: string
+      value_added_tax_included:
+        type: boolean
+      max_price:
+        type: integer
+      min_price:
+        type: integer
 externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'

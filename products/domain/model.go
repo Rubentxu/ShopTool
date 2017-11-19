@@ -59,6 +59,22 @@ type TransportSpecification struct {
 	Transporters           []Transporter `json:"transporters" bson:"transporters"`
 }
 
+type PricesSpecification struct {
+	IdTaxtRulesGroup      eh.UUID   `json:"id_taxt_rules_group" bson:"id_taxt_rules_group"`
+	Price                 int64     `json:"price" bson:"price"`
+	WholeSalePrice        int64     `json:"whole_sale_price" bson:"whole_sale_price"`
+	UnitPriceRatio        string    `json:"unit_price_ratio" bson:"unit_price_ratio"`
+	ShowPrice             bool      `json:"show_price" bson:"show_price"`
+	PrioritiesForRules    []string  `json:"priorities_for_rules" bson:"priorities_for_rules"`
+	Ecotax                int       `json:"ecotax" bson:"ecotax"`
+	PriceCurrency         string    `json:"price_currency" bson:"price_currency"`
+	ValidFrom             time.Time `json:"valid_from" bson:"valid_from"`
+	ValidThrough          time.Time `json:"valid_through" bson:"valid_through"`
+	ValueAddedTaxIncluded bool      `json:"value_added_tax_included" bson:"value_added_tax_included"`
+	MaxPrice              int       `json:"max_price" bson:"max_price"`
+	MinPrice              int       `json:"min_price" bson:"min_price"`
+}
+
 // Product  is the read model for the product.
 type Product struct {
 	ID                     eh.UUID        `json:"id" bson:"id"`
@@ -72,6 +88,7 @@ type Product struct {
 	ProductLangs           []*ProductLang `json:"productLangs" bson:"productLangs"`
 	Availability           `json:"availability" bson:"availability"`
 	TransportSpecification `json:"transport_specification" bson:"transport_specification"`
+	PricesSpecification `json:"price_specification" bson:"price_specification"`
 }
 
 var _ = eh.Entity(&Product{})

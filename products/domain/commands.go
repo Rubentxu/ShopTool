@@ -12,6 +12,10 @@ func init() {
 	eh.RegisterCommand(func() eh.Command { return &RemoveProductLang{} })
 	eh.RegisterCommand(func() eh.Command { return &SetAvailability{} })
 	eh.RegisterCommand(func() eh.Command { return &SetTransportSpecification{} })
+	eh.RegisterCommand(func() eh.Command { return &AddTransport{} })
+	eh.RegisterCommand(func() eh.Command { return &UpdateTransport{} })
+	eh.RegisterCommand(func() eh.Command { return &RemoveTransport{} })
+	eh.RegisterCommand(func() eh.Command { return &SetPricesSpecification{} })
 
 }
 
@@ -27,6 +31,7 @@ const (
 	AddTransportCommand              = eh.CommandType("product:transportSpecification:addTransport")
 	UpdateTransportCommand           = eh.CommandType("product:transportSpecification:updateTransport")
 	RemoveTransportCommand           = eh.CommandType("product:transportSpecification:removeTransport")
+	SetPricesSpecificationCommand    = eh.CommandType("product:pricesSpecification")
 )
 
 // Static type check that the eventhorizon.Command interface is implemented.
@@ -40,6 +45,7 @@ var _ = eh.Command(&SetTransportSpecification{})
 var _ = eh.Command(&AddTransport{})
 var _ = eh.Command(&UpdateTransport{})
 var _ = eh.Command(&RemoveTransport{})
+var _ = eh.Command(&SetPricesSpecification{})
 
 // Create creates a new todo list.
 type Create struct {
@@ -167,7 +173,7 @@ func (c *AddTransport) CommandType() eh.CommandType {
 
 type UpdateTransport struct {
 	Transporter
-	ProductID eh.UUID `json:"id"`
+	ProductID eh.UUID `json:"id" b`
 }
 
 // AggregateType type para TransporterItem
@@ -194,5 +200,21 @@ func (c *RemoveTransport) AggregateID() eh.UUID { return c.ProductID }
 
 // CommandType type para TransporterItem
 func (c *RemoveTransport) CommandType() eh.CommandType {
+	return RemoveTransportCommand
+}
+
+type SetPricesSpecification struct {
+	PricesSpecification
+	ProductID   eh.UUID `json:"id"`
+}
+
+// AggregateType type para SetPricesSpecification
+func (c *SetPricesSpecification) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para SetPricesSpecification
+func (c *SetPricesSpecification) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para SetPricesSpecification
+func (c *SetPricesSpecification) CommandType() eh.CommandType {
 	return RemoveTransportCommand
 }
