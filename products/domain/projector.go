@@ -38,6 +38,7 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 		// Set the ID when first created.
 		model.ID = event.AggregateID()
 		model.ProductLangs = []*ProductLang{} // Prevents "null" in JSON.
+		model.Images = []Image{}
 		model.Reference = data.Reference
 		model.Upc = data.Upc
 		model.Isbn = data.Isbn
@@ -66,7 +67,7 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 		model.ProductLangs = append(model.ProductLangs, productLang)
 	case ProductLangRemoved:
 		println("Projector ProductLangAdded")
-		data, ok := event.Data().(*ProductLangRemoveData)
+		data, ok := event.Data().(*ProductLangRemovedData)
 		if !ok {
 			return nil, errors.New("invalid event data ProductLangAdded")
 		}
@@ -148,6 +149,63 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 			return nil, fmt.Errorf("Invalid event %s", event.EventType())
 		}
 		model.PricesSpecification = data.PricesSpecification
+	case ImageAdded:
+		data, ok := event.Data().(*ImageAddedData)
+		if !ok {
+			return nil, fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+		for _, e := range model.Images {
+			if len(model.Images) > 0 && e.Name != "" && e.Name == data.Name {
+				return nil, fmt.Errorf("image %s for aggretate %s exist -> ", e.Name, model.EntityID())
+			}
+		}
+		model.Images = append(model.Images, data.Image)
+	case ImageUpdated:
+		data, ok := event.Data().(*ImageUpdatedData)
+		if !ok {
+			return nil, fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+
+		var imageItem Image
+		if model.Images == nil {
+			return nil, fmt.Errorf("Image for name %s not exist", data.Name)
+		}
+
+		for _, e := range model.Images {
+			if e.Name == data.Name {
+				imageItem = e
+			}
+		}
+
+		if imageItem.Name == "" {
+			return nil, fmt.Errorf("Image for name %s not exist", data.Name)
+		}
+		model.Images = append(model.Images, Image{
+			Name:        imageItem.Name,
+			Description: data.Description,
+			Caption:     data.Description,
+			Thumbnail:   imageItem.Thumbnail,
+		})
+	case ImageRemoved:
+		data, ok := event.Data().(*ImageRemovedData)
+		if !ok {
+			return nil, fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+		if model.Images == nil {
+			return nil, fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+
+		removedImage := false
+		atemp := model.Images
+		for i, e := range atemp {
+			if e.Name == data.Name {
+				model.Images = atemp[:i+copy(atemp[i:], atemp[i+1:])]
+				removedImage = true
+			}
+		}
+		if !removedImage {
+			return nil, fmt.Errorf("Image %s not exist", data.Name)
+		}
 	}
 
 	model.Version++

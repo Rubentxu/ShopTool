@@ -33,6 +33,7 @@ type AggregateProduct struct {
 	productLangs           []ProductLang
 	transportSpecification TransportSpecification
 	pricesSpecification    PricesSpecification
+	images                 []Image
 }
 
 // HandleCommand implements the HandleCommand method of the
@@ -70,7 +71,7 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 			ProductLang: cmd.ProductLang,
 		}, TimeNow())
 	case *RemoveProductLang:
-		a.StoreEvent(ProductLangRemoved, &ProductLangRemoveData{
+		a.StoreEvent(ProductLangRemoved, &ProductLangRemovedData{
 			LangCode: cmd.LangCode,
 		}, TimeNow())
 	case *SetAvailability:
@@ -96,6 +97,16 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 	case *SetPricesSpecification:
 		a.StoreEvent(PricesSpecificationSet, &PricesSpecificationData{
 			PricesSpecification: cmd.PricesSpecification,
+		}, TimeNow())
+	case *AddImage:
+		a.StoreEvent(ImageAdded, &ImageAddedData{
+			Image: cmd.Image,
+		}, TimeNow())
+	case *UpdateImage:
+		a.StoreEvent(ImageUpdated, &ImageUpdatedData{
+			Name:        cmd.Name,
+			Description: cmd.Description,
+			Caption:     cmd.Caption,
 		}, TimeNow())
 	default:
 		return fmt.Errorf("could not handle command: %s", cmd.CommandType())
@@ -149,7 +160,7 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		a.productLangs = append(a.productLangs, data.ProductLang)
 
 	case ProductLangRemoved:
-		data, ok := event.Data().(*ProductLangRemoveData)
+		data, ok := event.Data().(*ProductLangRemovedData)
 		if !ok {
 			return fmt.Errorf("Invalid event %s for productLang %s", event.EventType(), data.LangCode)
 		}
@@ -199,18 +210,18 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 			return fmt.Errorf("Invalid event %s for transporter %s", event.EventType(), data.Id)
 		}
 
-		existProductLang := false
+		exist := false
 		if a.transportSpecification.Transporters == nil {
 			return fmt.Errorf("Transporter for %s not exist", data.Id)
 		}
 
 		for _, e := range a.transportSpecification.Transporters {
 			if e.Id == data.Id {
-				existProductLang = true
+				exist = true
 			}
 		}
 
-		if !existProductLang {
+		if !exist {
 			return fmt.Errorf("Transporter for ID %s not exist", data.Id)
 		}
 		a.transportSpecification.Transporters = append(a.transportSpecification.Transporters, data.Transporter)
@@ -223,15 +234,15 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 			return fmt.Errorf("Invalid event %s for transporter %s", event.EventType(), data.transportID)
 		}
 
-		removedProductLang := false
+		removedTransport := false
 		atemp := a.transportSpecification.Transporters
 		for i, e := range atemp {
 			if e.Id == data.transportID {
 				a.transportSpecification.Transporters = atemp[:i+copy(atemp[i:], atemp[i+1:])]
-				removedProductLang = true
+				removedTransport = true
 			}
 		}
-		if !removedProductLang {
+		if !removedTransport {
 			return fmt.Errorf("Transporter for ID %s not exist", data.transportID)
 		}
 	case PricesSpecificationSet:
@@ -240,6 +251,63 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 			return fmt.Errorf("Invalid event %s", event.EventType())
 		}
 		a.pricesSpecification = data.PricesSpecification
+	case ImageAdded:
+		data, ok := event.Data().(*ImageAddedData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+		for _, e := range a.images {
+			if len(a.images) > 0 && e.Name != "" && e.Name == data.Name {
+				return fmt.Errorf("image %s for aggretate  %s exist -> ", e.Name, a.EntityID())
+			}
+		}
+		a.images = append(a.images, data.Image)
+	case ImageUpdated:
+		data, ok := event.Data().(*ImageUpdatedData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+
+		var imageItem Image
+		if a.images == nil {
+			return fmt.Errorf("Image for name %s not exist", data.Name)
+		}
+
+		for _, e := range a.images {
+			if e.Name == data.Name {
+				imageItem = e
+			}
+		}
+
+		if imageItem.Name == "" {
+			return fmt.Errorf("Image for name %s not exist", data.Name)
+		}
+		a.images = append(a.images, Image{
+			Name:        imageItem.Name,
+			Description: data.Description,
+			Caption:     data.Description,
+			Thumbnail:   imageItem.Thumbnail,
+		})
+	case ImageRemoved:
+		data, ok := event.Data().(*ImageRemovedData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+		if a.images == nil {
+			return fmt.Errorf("Invalid event %s for image %s", event.EventType(), data.Name)
+		}
+
+		removedImage := false
+		atemp := a.images
+		for i, e := range atemp {
+			if e.Name == data.Name {
+				a.images = atemp[:i+copy(atemp[i:], atemp[i+1:])]
+				removedImage = true
+			}
+		}
+		if !removedImage {
+			return fmt.Errorf("Image %s not exist", data.Name)
+		}
 	default:
 		return fmt.Errorf("Could not apply event: %s", event.EventType())
 	}

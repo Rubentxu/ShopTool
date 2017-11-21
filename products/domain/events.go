@@ -17,6 +17,9 @@ const (
 	TransportUpdated          = eh.EventType("product:transportSpecification:transportUpdated")
 	TransportRemoved          = eh.EventType("product:transportSpecification:transportRemoved")
 	PricesSpecificationSet    = eh.EventType("product:pricesSpecification")
+	ImageAdded                = eh.EventType("product:imageAdded")
+	ImageUpdated              = eh.EventType("product:imageUpdated")
+	ImageRemoved              = eh.EventType("product:imageRemoved")
 )
 
 func init() {
@@ -30,7 +33,7 @@ func init() {
 		return &ProductLangData{}
 	})
 	eh.RegisterEventData(ProductLangRemoved, func() eh.EventData {
-		return &ProductLangRemoveData{}
+		return &ProductLangRemovedData{}
 	})
 	eh.RegisterEventData(AvailabilitySet, func() eh.EventData {
 		return &AvailabilityData{}
@@ -50,6 +53,15 @@ func init() {
 	eh.RegisterEventData(PricesSpecificationSet, func() eh.EventData {
 		return &PricesSpecificationData{}
 	})
+	eh.RegisterEventData(ImageAdded, func() eh.EventData {
+		return &ImageAddedData{}
+	})
+	eh.RegisterEventData(ImageUpdated, func() eh.EventData {
+		return &ImageUpdatedData{}
+	})
+	eh.RegisterEventData(ImageRemoved, func() eh.EventData {
+		return &ImageRemovedData{}
+	})
 }
 
 // CreateData is the event data for the Product
@@ -65,8 +77,8 @@ type ProductLangData struct {
 	ProductLang
 }
 
-// ProductLangRemoveData is the event data for the ProductLangRemoved
-type ProductLangRemoveData struct {
+// ProductLangRemovedData is the event data for the ProductLangRemoved
+type ProductLangRemovedData struct {
 	LangCode string `json:"lang_code" bson:"lang_code"`
 }
 
@@ -88,4 +100,18 @@ type TranporterRemovedData struct {
 
 type PricesSpecificationData struct {
 	PricesSpecification
+}
+
+type ImageAddedData struct {
+	Image
+}
+
+type ImageUpdatedData struct {
+	Name        string `json:"name" bson:"name"`
+	Description string `json:"description" bson:"description"`
+	Caption     string `json:"caption" bson:"caption"`
+}
+
+type ImageRemovedData struct {
+	Name string `json:"name" bson:"name"`
 }

@@ -16,6 +16,9 @@ func init() {
 	eh.RegisterCommand(func() eh.Command { return &UpdateTransport{} })
 	eh.RegisterCommand(func() eh.Command { return &RemoveTransport{} })
 	eh.RegisterCommand(func() eh.Command { return &SetPricesSpecification{} })
+	eh.RegisterCommand(func() eh.Command { return &AddImage{} })
+	eh.RegisterCommand(func() eh.Command { return &UpdateImage{} })
+	eh.RegisterCommand(func() eh.Command { return &RemoveImage{} })
 
 }
 
@@ -32,6 +35,9 @@ const (
 	UpdateTransportCommand           = eh.CommandType("product:transportSpecification:updateTransport")
 	RemoveTransportCommand           = eh.CommandType("product:transportSpecification:removeTransport")
 	SetPricesSpecificationCommand    = eh.CommandType("product:pricesSpecification")
+	AddImageCommand                  = eh.CommandType("product:addImage")
+	UpdateImageCommand               = eh.CommandType("product:updateImage")
+	RemoveImageCommand               = eh.CommandType("product:removeImage")
 )
 
 // Static type check that the eventhorizon.Command interface is implemented.
@@ -46,6 +52,9 @@ var _ = eh.Command(&AddTransport{})
 var _ = eh.Command(&UpdateTransport{})
 var _ = eh.Command(&RemoveTransport{})
 var _ = eh.Command(&SetPricesSpecification{})
+var _ = eh.Command(&AddImage{})
+var _ = eh.Command(&UpdateImage{})
+var _ = eh.Command(&RemoveImage{})
 
 // Create creates a new todo list.
 type Create struct {
@@ -216,5 +225,55 @@ func (c *SetPricesSpecification) AggregateID() eh.UUID { return c.ProductID }
 
 // CommandType type para SetPricesSpecification
 func (c *SetPricesSpecification) CommandType() eh.CommandType {
-	return RemoveTransportCommand
+	return SetPricesSpecificationCommand
+}
+
+type AddImage struct {
+	Image
+	ProductID eh.UUID `json:"id"`
+}
+
+// AggregateType type para SetPricesSpecification
+func (c *AddImage) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para SetPricesSpecification
+func (c *AddImage) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para SetPricesSpecification
+func (c *AddImage) CommandType() eh.CommandType {
+	return AddImageCommand
+}
+
+type UpdateImage struct {
+	Name        string  `json:"name"`
+	Description string  `json:"description"`
+	Caption     string  `json:"caption"`
+	ProductID   eh.UUID `json:"id"`
+}
+
+// AggregateType type para SetPricesSpecification
+func (c *UpdateImage) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para SetPricesSpecification
+func (c *UpdateImage) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para SetPricesSpecification
+func (c *UpdateImage) CommandType() eh.CommandType {
+	return UpdateImageCommand
+}
+
+type RemoveImage struct {
+	Name        string  `json:"name"`
+	ProductID   eh.UUID `json:"id"`
+}
+
+// AggregateType type para SetPricesSpecification
+func (c *RemoveImage) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para SetPricesSpecification
+func (c *RemoveImage) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para SetPricesSpecification
+func (c *RemoveImage) CommandType() eh.CommandType {
+	return RemoveImageCommand
 }

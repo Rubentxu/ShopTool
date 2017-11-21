@@ -20,6 +20,8 @@ import (
 	eventpublisher "github.com/looplab/eventhorizon/publisher/local"
 	repo "github.com/looplab/eventhorizon/repo/mongodb"
 	"github.com/looplab/eventhorizon/repo/version"
+	"io"
+	"os"
 )
 
 // Handler is a http.Handler for the ShopTool app.
@@ -127,6 +129,7 @@ func NewHandler(dbURL string) (*Handler, error) {
 	h.Handle("/api/product/command/transport/update", httputils.CommandHandler(loggingHandler, domain.UpdateTransportCommand))
 	h.Handle("/api/product/command/transport/remove", httputils.CommandHandler(loggingHandler, domain.RemoveTransportCommand))
 	h.Handle("/api/product/command/pricesSpecification", httputils.CommandHandler(loggingHandler, domain.SetPricesSpecificationCommand))
+	h.Handle("/api/product/command/addImage", AddImageHandler(loggingHandler))
 	h.Handle("/api/product/docs/", http.StripPrefix("/api/product/docs/", http.FileServer(http.Dir("swagger-ui/"))))
 
 	logger := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -232,4 +235,54 @@ func EventBusHandler(eventPublisher eh.EventPublisher) http.Handler {
 			}
 		}
 	})
+
+}
+func AddImageHandler(commandHandler eh.CommandHandler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != "POST" {
+			http.Error(w, "unsuported method: "+r.Method, http.StatusMethodNotAllowed)
+			return
+		}
+
+		cmd, err := eh.CreateCommand(domain.AddImageCommand)
+
+		if err != nil {
+			http.Error(w, "could not create command: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		r.ParseMultipartForm(32 << 20)
+		file, handler, err := r.FormFile("uploadfile")
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer file.Close()
+		fmt.Fprintf(w, "%v", handler.Header)
+		f, err := os.OpenFile("./build/images/"+handler.Filename, os.O_WRONLY|os.O_CREATE, 0660)
+		if err != nil {
+			fmt.Println(err)
+			return
+		}
+		defer f.Close()
+		io.Copy(f, file)
+
+		cmd.(*domain.AddImage).ProductID = eh.UUID(r.FormValue("id"))
+		cmd.(*domain.AddImage).Name = handler.Filename
+		cmd.(*domain.AddImage).Thumbnail = "Thumb_" + handler.Filename
+		cmd.(*domain.AddImage).Description = r.FormValue("description")
+		cmd.(*domain.AddImage).Caption = r.FormValue("caption")
+
+		ctx := context.Background()
+		if err := commandHandler.HandleCommand(ctx, cmd); err != nil {
+			http.Error(w, "could not handle command: "+err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
+	})
+}
+
+func upload(w http.ResponseWriter, r *http.Request) {
+
 }

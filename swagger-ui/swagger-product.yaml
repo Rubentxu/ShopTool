@@ -281,6 +281,41 @@ paths:
           description: successful operation
         '400':
           description: Comando no valido
+  /product/command/addImage:
+    post:
+      tags:
+        - Comandos
+      summary: subir una imagen
+      description: ''
+      operationId: subir una imagen
+      consumes:
+        - multipart/form-data
+      produces:
+        - application/json
+      parameters:
+        - name: id
+          in: formData
+          description: ID del producto
+          required: true
+          type: string
+        - name: description
+          in: formData
+          description: descripcion de la imagen
+          required: false
+          type: string
+        - name: caption
+          in: formData
+          description: caption de la imagen
+          required: false
+          type: string
+        - name: uploadfile
+          in: formData
+          description: file to upload
+          required: false
+          type: file
+      responses:
+        '200':
+          description: successful operation
   /product/:
     get:
       tags:

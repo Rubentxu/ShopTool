@@ -75,6 +75,13 @@ type PricesSpecification struct {
 	MinPrice              int       `json:"min_price" bson:"min_price"`
 }
 
+type Image struct {
+	Name        string `json:"name" bson:"name"`
+	Description string `json:"description" bson:"description"`
+	Caption     string `json:"caption" bson:"caption"`
+	Thumbnail   string `json:"thumbnail" bson:"thumbnail"`
+}
+
 // Product  is the read model for the product.
 type Product struct {
 	ID                     eh.UUID        `json:"id" bson:"id"`
@@ -88,7 +95,8 @@ type Product struct {
 	ProductLangs           []*ProductLang `json:"productLangs" bson:"productLangs"`
 	Availability           `json:"availability" bson:"availability"`
 	TransportSpecification `json:"transport_specification" bson:"transport_specification"`
-	PricesSpecification `json:"price_specification" bson:"price_specification"`
+	PricesSpecification    `json:"price_specification" bson:"price_specification"`
+	Images                 []Image
 }
 
 var _ = eh.Entity(&Product{})
