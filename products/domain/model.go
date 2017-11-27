@@ -21,12 +21,26 @@ type ProductLang struct {
 }
 
 type Visibility int
+type Unity int
+type Condition int
 
 const (
 	BOTH Visibility = 1 + iota
 	CATALOG
 	SEARCH
 	NONE
+)
+
+const (
+	KILOS Unity = 1 + iota
+	GRAMOS
+	PIEZAS
+)
+
+const (
+	NEW Condition = 1 + iota
+	USED
+	REFURBISHED
 )
 
 type Availability struct {
@@ -48,6 +62,22 @@ type Transporter struct {
 	Id          eh.UUID `json:"transporter_id" bson:"transporter_id"`
 	Name        string  `json:"name" bson:"name"`
 	Description string  `json:"description" bson:"description"`
+}
+
+type Type struct {
+	Name            string    `json:"name" bson:"name"`
+	Description     string    `json:"description" bson:"description"`
+	Unity           Unity     `json:"unity" bson:"unity"`
+	IsSimilar       bool      `json:"is_similar" bson:"is_similar"`
+	Model           string    `json:"model" bson:"model"`
+	Condition       Condition `json:"condition" bson:"condition"`
+	Characteristics []Characteristic
+}
+
+type Characteristic struct {
+	Name         string `json:"name" bson:"name"`
+	Value        string `json:"value" bson:"value"`
+	DefaultValue string `json:"default_value" bson:"default_value"`
 }
 
 type TransportSpecification struct {
@@ -97,6 +127,7 @@ type Product struct {
 	TransportSpecification `json:"transport_specification" bson:"transport_specification"`
 	PricesSpecification    `json:"price_specification" bson:"price_specification"`
 	Images                 []Image
+	ProductType            Type
 }
 
 var _ = eh.Entity(&Product{})

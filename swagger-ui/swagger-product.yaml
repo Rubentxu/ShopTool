@@ -16,7 +16,7 @@ paths:
   /product/command/create:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: Crea un nuevo producto
       description: ''
       consumes:
@@ -38,7 +38,7 @@ paths:
   /product/command/remove:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: Elimina un nuevo producto
       description: ''
       consumes:
@@ -62,7 +62,7 @@ paths:
   /product/command/prodlang/add:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: Añade una definicion de idioma al producto
       description: ''
       consumes:
@@ -86,7 +86,7 @@ paths:
   /product/command/prodlang/update:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: Actualiza una definicion en un idioma del producto
       description: ''
       consumes:
@@ -110,7 +110,7 @@ paths:
   /product/command/prodlang/remove:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: 'Elimina una definicion en un idioma del producto, el id es del producto'
       description: ''
       consumes:
@@ -134,7 +134,7 @@ paths:
   /product/command/availabilityConfig:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: 'Configura la disponibilidad del producto, el id es del producto'
       description: ''
       consumes:
@@ -158,7 +158,7 @@ paths:
   /product/command/transportSpecificationConfig:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: >-
         Configura la especificacion de transporte del producto, el id es del
         producto
@@ -184,7 +184,7 @@ paths:
   /product/command/transport/add:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: 'Agrega un transportista al producto, el id es del producto'
       description: ''
       consumes:
@@ -208,7 +208,7 @@ paths:
   /product/command/transport/update:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: >-
         Actualiza un transportista existente en el producto, el id es del
         producto
@@ -234,7 +234,7 @@ paths:
   /product/command/transport/remove:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: 'Elimina un transportista existente en el producto, el id es del producto'
       description: ''
       consumes:
@@ -258,7 +258,7 @@ paths:
   /product/command/pricesSpecification:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: >-
         Configura la especificacion de precios en el producto, el id es del
         producto
@@ -284,7 +284,7 @@ paths:
   /product/command/addImage:
     post:
       tags:
-        - Comandos
+        - Comandos de Producto
       summary: subir una imagen
       description: ''
       operationId: subir una imagen
@@ -316,10 +316,108 @@ paths:
       responses:
         '200':
           description: successful operation
+  /product/command/typeSet:
+    post:
+      tags:
+        - Comandos de Producto
+      summary: 'Configura el tipo del producto, el id es del producto'
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando SetTypeCommand,
+            el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/SetTypeCommand'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/characteristic/add:
+    post:
+      tags:
+        - Comandos de Producto
+      summary: 'Agrega una caracteristica al producto, el id es del producto'
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            AddCharacteristicCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/CharacteristicsData'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/characteristic/update:
+    post:
+      tags:
+        - Comandos de Producto
+      summary: 'Actualiza una caracteristica en el producto, el id es del producto'
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            UpdateCharacteristicCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/CharacteristicsData'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
+  /product/command/characteristic/remove:
+    post:
+      tags:
+        - Comandos de Producto
+      summary: >-
+        Elimina una caracteristica existente en el producto, el id es del
+        producto
+      description: ''
+      consumes:
+        - application/json
+      produces:
+        - application/json
+      parameters:
+        - in: body
+          name: body
+          description: >-
+            Necesitamos definir los parametros para el comando
+            RemoveCharacteristicCommand, el id es del producto
+          required: true
+          schema:
+            $ref: '#/definitions/CharacteristicsRemovedData'
+      responses:
+        '200':
+          description: successful operation
+        '400':
+          description: Comando no valido
   /product/:
     get:
       tags:
-        - Product
+        - Proyecciones de Producto
       summary: Consulta los productos disponibles
       description: ''
       consumes:
@@ -334,7 +432,7 @@ paths:
   '/product/{productId}':
     get:
       tags:
-        - Product
+        - Proyecciones de Producto
       summary: Consulta un producto por su id
       description: ''
       consumes:
@@ -527,6 +625,52 @@ definitions:
         type: integer
       min_price:
         type: integer
+  SetTypeCommand:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del producto
+      name:
+        type: string
+      description:
+        type: string
+      unity:
+        type: string
+        enum:
+          - KILOS
+          - GRAMOS
+          - PIEZAS
+      is_similar:
+        type: boolean
+      model:
+        type: string
+      condition:
+        type: string
+        enum:
+          - NEW
+          - USED
+          - REFURBISHED
+  CharacteristicsData:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del producto
+      name:
+        type: string
+      value:
+        type: string
+      default_value:
+        type: string
+  CharacteristicsRemovedData:
+    type: object
+    properties:
+      id:
+        type: string
+        description: id del producto
+      name:
+        type: string
 externalDocs:
   description: Find out more about Swagger
   url: 'http://swagger.io'

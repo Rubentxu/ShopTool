@@ -20,6 +20,10 @@ const (
 	ImageAdded                = eh.EventType("product:imageAdded")
 	ImageUpdated              = eh.EventType("product:imageUpdated")
 	ImageRemoved              = eh.EventType("product:imageRemoved")
+	TypeSet                   = eh.EventType("product:typeSet")
+	CharacteristicAdded       = eh.EventType("product:type:characteristicAdded")
+	CharacteristicUpdated     = eh.EventType("product:type:characteristicUpdated")
+	CharacteristicRemoved     = eh.EventType("product:type:characteristicRemoved")
 )
 
 func init() {
@@ -61,6 +65,18 @@ func init() {
 	})
 	eh.RegisterEventData(ImageRemoved, func() eh.EventData {
 		return &ImageRemovedData{}
+	})
+	eh.RegisterEventData(TypeSet, func() eh.EventData {
+		return &TypeData{}
+	})
+	eh.RegisterEventData(CharacteristicAdded, func() eh.EventData {
+		return &CharacteristicData{}
+	})
+	eh.RegisterEventData(CharacteristicUpdated, func() eh.EventData {
+		return &CharacteristicData{}
+	})
+	eh.RegisterEventData(CharacteristicRemoved, func() eh.EventData {
+		return &CharacteristicRemovedData{}
 	})
 }
 
@@ -113,5 +129,17 @@ type ImageUpdatedData struct {
 }
 
 type ImageRemovedData struct {
+	Name string `json:"name" bson:"name"`
+}
+
+type TypeData struct {
+	Type
+}
+
+type CharacteristicData struct {
+	Characteristic
+}
+
+type CharacteristicRemovedData struct {
 	Name string `json:"name" bson:"name"`
 }
