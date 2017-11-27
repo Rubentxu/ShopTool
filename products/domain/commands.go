@@ -19,6 +19,10 @@ func init() {
 	eh.RegisterCommand(func() eh.Command { return &AddImage{} })
 	eh.RegisterCommand(func() eh.Command { return &UpdateImage{} })
 	eh.RegisterCommand(func() eh.Command { return &RemoveImage{} })
+	eh.RegisterCommand(func() eh.Command { return &SetType{} })
+	eh.RegisterCommand(func() eh.Command { return &AddCharacteristic{} })
+	eh.RegisterCommand(func() eh.Command { return &UpdateCharacteristic{} })
+	eh.RegisterCommand(func() eh.Command { return &RemoveCharacteristic{} })
 
 }
 
@@ -38,6 +42,10 @@ const (
 	AddImageCommand                  = eh.CommandType("product:addImage")
 	UpdateImageCommand               = eh.CommandType("product:updateImage")
 	RemoveImageCommand               = eh.CommandType("product:removeImage")
+	SetTypeCommand                   = eh.CommandType("product:setType")
+	AddCharacteristicCommand         = eh.CommandType("product:type:addCharacteristic")
+	UpdateCharacteristicCommand      = eh.CommandType("product:type:updateCharacteristic")
+	RemoveCharacteristicCommand      = eh.CommandType("product:type:removeCharacteristic")
 )
 
 // Static type check that the eventhorizon.Command interface is implemented.
@@ -55,6 +63,10 @@ var _ = eh.Command(&SetPricesSpecification{})
 var _ = eh.Command(&AddImage{})
 var _ = eh.Command(&UpdateImage{})
 var _ = eh.Command(&RemoveImage{})
+var _ = eh.Command(&SetType{})
+var _ = eh.Command(&AddCharacteristic{})
+var _ = eh.Command(&UpdateCharacteristic{})
+var _ = eh.Command(&RemoveCharacteristic{})
 
 // Create creates a new todo list.
 type Create struct {
@@ -214,7 +226,7 @@ func (c *RemoveTransport) CommandType() eh.CommandType {
 
 type SetPricesSpecification struct {
 	PricesSpecification
-	ProductID   eh.UUID `json:"id"`
+	ProductID eh.UUID `json:"id"`
 }
 
 // AggregateType type para SetPricesSpecification
@@ -263,8 +275,8 @@ func (c *UpdateImage) CommandType() eh.CommandType {
 }
 
 type RemoveImage struct {
-	Name        string  `json:"name"`
-	ProductID   eh.UUID `json:"id"`
+	Name      string  `json:"name"`
+	ProductID eh.UUID `json:"id"`
 }
 
 // AggregateType type para SetPricesSpecification
@@ -276,4 +288,69 @@ func (c *RemoveImage) AggregateID() eh.UUID { return c.ProductID }
 // CommandType type para SetPricesSpecification
 func (c *RemoveImage) CommandType() eh.CommandType {
 	return RemoveImageCommand
+}
+
+// SetType definición de disponibilidad de producto
+type SetType struct {
+	Type
+	ProductID eh.UUID `json:"id"`
+}
+
+// AggregateType type para SetType
+func (c *SetType) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para SetType
+func (c *SetType) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para SetType
+func (c *SetType) CommandType() eh.CommandType {
+	return SetTypeCommand
+}
+
+type AddCharacteristic struct {
+	Characteristic
+	ProductID eh.UUID `json:"id"`
+}
+
+// AggregateType type para Characteristic
+func (c *AddCharacteristic) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para Characteristic
+func (c *AddCharacteristic) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para Characteristic
+func (c *AddCharacteristic) CommandType() eh.CommandType {
+	return AddCharacteristicCommand
+}
+
+type UpdateCharacteristic struct {
+	Characteristic
+	ProductID eh.UUID `json:"id" b`
+}
+
+// AggregateType type para Characteristic
+func (c *UpdateCharacteristic) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para Characteristic
+func (c *UpdateCharacteristic) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para Characteristic
+func (c *UpdateCharacteristic) CommandType() eh.CommandType {
+	return UpdateCharacteristicCommand
+}
+
+type RemoveCharacteristic struct {
+	Name      string  `json:"name"`
+	ProductID eh.UUID `json:"id"`
+}
+
+// AggregateType type para Characteristic
+func (c *RemoveCharacteristic) AggregateType() eh.AggregateType { return AggregateProductType }
+
+// AggregateID type para Characteristic
+func (c *RemoveCharacteristic) AggregateID() eh.UUID { return c.ProductID }
+
+// CommandType type para Characteristic
+func (c *RemoveCharacteristic) CommandType() eh.CommandType {
+	return RemoveCharacteristicCommand
 }

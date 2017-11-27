@@ -34,6 +34,7 @@ type AggregateProduct struct {
 	transportSpecification TransportSpecification
 	pricesSpecification    PricesSpecification
 	images                 []Image
+	productType            Type
 }
 
 // HandleCommand implements the HandleCommand method of the
@@ -107,6 +108,22 @@ func (a *AggregateProduct) HandleCommand(ctx context.Context, cmd eh.Command) er
 			Name:        cmd.Name,
 			Description: cmd.Description,
 			Caption:     cmd.Caption,
+		}, TimeNow())
+	case *SetType:
+		a.StoreEvent(TypeSet, &TypeData{
+			Type: cmd.Type,
+		}, TimeNow())
+	case *AddCharacteristic:
+		a.StoreEvent(CharacteristicAdded, &CharacteristicData{
+			Characteristic: cmd.Characteristic,
+		}, TimeNow())
+	case *UpdateCharacteristic:
+		a.StoreEvent(CharacteristicUpdated, &CharacteristicData{
+			Characteristic: cmd.Characteristic,
+		}, TimeNow())
+	case *RemoveCharacteristic:
+		a.StoreEvent(CharacteristicRemoved, &CharacteristicRemovedData{
+			Name: cmd.Name,
 		}, TimeNow())
 	default:
 		return fmt.Errorf("could not handle command: %s", cmd.CommandType())
@@ -307,6 +324,66 @@ func (a *AggregateProduct) ApplyEvent(ctx context.Context, event eh.Event) error
 		}
 		if !removedImage {
 			return fmt.Errorf("Image %s not exist", data.Name)
+		}
+	case TypeSet:
+		data, ok := event.Data().(*TypeData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s", event.EventType())
+		}
+		a.productType = data.Type
+	case CharacteristicAdded:
+		data, ok := event.Data().(*CharacteristicData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
+		}
+		for _, e := range a.productType.Characteristics {
+
+			if len(a.productType.Characteristics) > 0 && e.Name != "" && e.Name == data.Name {
+				return fmt.Errorf("Characteristic %s for aggretate  %s exist -> ", e.Name, a.EntityID())
+
+			}
+		}
+		a.productType.Characteristics = append(a.productType.Characteristics, data.Characteristic)
+	case CharacteristicUpdated:
+		data, ok := event.Data().(*CharacteristicData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
+		}
+
+		exist := false
+		if a.productType.Characteristics == nil {
+			return fmt.Errorf("Characteristic %s not exist", data.Name)
+		}
+
+		for _, e := range a.productType.Characteristics {
+			if e.Name == data.Name {
+				exist = true
+			}
+		}
+
+		if !exist {
+			return fmt.Errorf("Characteristic %s not exist", data.Name)
+		}
+		a.productType.Characteristics = append(a.productType.Characteristics, data.Characteristic)
+	case CharacteristicRemoved:
+		data, ok := event.Data().(*CharacteristicRemovedData)
+		if !ok {
+			return fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
+		}
+		if a.productType.Characteristics == nil {
+			return fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
+		}
+
+		removedCharacteristic := false
+		atemp := a.productType.Characteristics
+		for i, e := range atemp {
+			if e.Name == data.Name {
+				a.productType.Characteristics = atemp[:i+copy(atemp[i:], atemp[i+1:])]
+				removedCharacteristic = true
+			}
+		}
+		if !removedCharacteristic {
+			return fmt.Errorf("Characteristic %s not exist", data.Name)
 		}
 	default:
 		return fmt.Errorf("Could not apply event: %s", event.EventType())
