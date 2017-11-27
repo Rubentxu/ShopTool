@@ -207,66 +207,6 @@ func (p *ProductProjector) Project(ctx context.Context, event eh.Event, entity e
 		if !removedImage {
 			return nil, fmt.Errorf("Image %s not exist", data.Name)
 		}
-	case TypeSet:
-		data, ok := event.Data().(*TypeData)
-		if !ok {
-			return nil, fmt.Errorf("Invalid event %s", event.EventType())
-		}
-		model.ProductType = data.Type
-	case CharacteristicAdded:
-		data, ok := event.Data().(*CharacteristicData)
-		if !ok {
-			return nil, fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
-		}
-		for _, e := range model.ProductType.Characteristics {
-
-			if len(model.ProductType.Characteristics) > 0 && e.Name != "" && e.Name == data.Name {
-				return nil, fmt.Errorf("Characteristic %s for aggretate  %s exist -> ", e.Name, model.EntityID())
-
-			}
-		}
-		model.ProductType.Characteristics = append(model.ProductType.Characteristics, data.Characteristic)
-	case CharacteristicUpdated:
-		data, ok := event.Data().(*CharacteristicData)
-		if !ok {
-			return nil, fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
-		}
-
-		exist := false
-		if model.ProductType.Characteristics == nil {
-			return nil, fmt.Errorf("Characteristic %s not exist", data.Name)
-		}
-
-		for _, e := range model.ProductType.Characteristics {
-			if e.Name == data.Name {
-				exist = true
-			}
-		}
-
-		if !exist {
-			return nil, fmt.Errorf("Characteristic %s not exist", data.Name)
-		}
-		model.ProductType.Characteristics = append(model.ProductType.Characteristics, data.Characteristic)
-	case CharacteristicRemoved:
-		data, ok := event.Data().(*CharacteristicRemovedData)
-		if !ok {
-			return nil, fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
-		}
-		if model.ProductType.Characteristics == nil {
-			return nil, fmt.Errorf("Invalid event %s for Characteristic %s", event.EventType(), data.Name)
-		}
-
-		removedCharacteristic := false
-		atemp := model.ProductType.Characteristics
-		for i, e := range atemp {
-			if e.Name == data.Name {
-				model.ProductType.Characteristics = atemp[:i+copy(atemp[i:], atemp[i+1:])]
-				removedCharacteristic = true
-			}
-		}
-		if !removedCharacteristic {
-			return nil, fmt.Errorf("Characteristic %s not exist", data.Name)
-		}
 	}
 
 	model.Version++
