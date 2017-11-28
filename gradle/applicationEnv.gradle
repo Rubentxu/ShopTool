@@ -1,0 +1,41 @@
+import java.util.stream.Collectors
+
+class SortedProperties extends Properties {
+    public Enumeration keys() {
+        Enumeration keysEnum = super.keys();
+        Vector<String> keyList = new Vector<String>();
+        while(keysEnum.hasMoreElements()){
+            keyList.add((String)keysEnum.nextElement());
+        }
+        Collections.sort(keyList);
+        return keyList.elements();
+    }
+
+}
+
+
+task generateApplicationConfig {
+    println "Configuracion para Aplicacion $config.application"
+
+    def envDirBase = new File("${buildDir}/config")
+    envDirBase.mkdirs()
+    def propertyFile = file(envDirBase.absolutePath + '/applicationEnv.properties')
+propertyFile.path
+    Properties props = new SortedProperties(config.entrySet()
+            .stream()
+            .filter({e-> e.getKey().toString().contains("application.")})
+            .map({ e ->  new AbstractMap.SimpleEntry<String, String>(((String) e.getKey()).replaceAll("application.", ""), ((String) e.getValue()).replaceAll($/\:/$, ":")) })
+            .sorted(Map.Entry.comparingByKey())
+            .collect(Collectors.toMap({e -> e.getKey()}, {e -> e.getValue()} )))
+
+    props.store(new OutputStreamWriter(new FileOutputStream(propertyFile), "ISO-8859-1"), "Propiedades de zBatConsole");
+    if(!propertyFile.exists()) {
+        throw new Exception("No se genero correctamente las properties de Entorno. $propertyFile.name")
+    } else {
+        println "Se genero el fichero $propertyFile.path"
+    }
+}
+
+tasks.build.dependsOn(generateApplicationConfig)
+tasks.publish.dependsOn(generateApplicationConfig)
+tasks.assemble.dependsOn(generateApplicationConfig)

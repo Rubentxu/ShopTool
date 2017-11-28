@@ -1,24 +1,47 @@
-plugins {
-    id 'com.github.blindpirate.gogradle' version '0.7.0'
+buildscript {
+    apply from: 'gradle/config/buildFunctions.groovy'
+    ext.config = propiedadesDeEntorno()
+
+    repositories {
+      //  jcenter { url "http://jcenter.bintray.com/" }
+        maven { url config['repositoryCentral'] }
+    }
+
+    dependencies {
+        classpath 'com.aestasit.infrastructure.sshoogr:sshoogr-gradle:0.9.18'
+        classpath group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.5'
+    }
+
 }
 
-golang {
-    packagePath = 'ShopTool'
-}
+//plugins {
+//    id 'com.github.blindpirate.gogradle' version '0.7.0'
+//}
 
-repositories {
-    golang {
-        root ~/github\.com\/[\w-]+\/[\w-]+/
-        url { path ->
-            def split = path.split('/')
-            "https://github.com/${split[1]}/${split[2]}"
-        }
+apply plugin: 'java'
+apply plugin: 'secureShell'
+//apply from: 'gradle/configService.gradle'
+// apply from: 'gradle/deploy.gradle'
+
+//golang {
+//    packagePath = 'ShopTool'
+//}
+
+
+
+//repositories {
+    //golang {
+      //  root ~/github\.com\/[\w-]+\/[\w-]+/
+        //url { path ->
+          //  def split = path.split('/')
+          //  "https://github.com/${split[1]}/${split[2]}"
+       // }
     }
-    golang {
-        root ~/git\.apache\.org\/thrift\.git\/lib\/go\/thrift/
-        url "https://github.com/apache/thrift/tree/master/lib/go/thrift/"
-    }
-}
+   // golang {
+     //   root ~/git\.apache\.org\/thrift\.git\/lib\/go\/thrift/
+       // url "https://github.com/apache/thrift/tree/master/lib/go/thrift/"
+   // }
+//}
 
 version '0.0.1'
 
