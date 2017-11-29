@@ -1,5 +1,4 @@
 def defaulSshKeyFile = "${System.properties['user.home']}/.ssh/${config['server.fileRsa']}"
-println "directorio ssh $defaulSshKeyFile"
 
 sshOptions {
     trustUnknownHosts = true
@@ -17,41 +16,42 @@ sshOptions {
 }
 
 
-
-task instalarApp {
-    description "Instalar app"
+task deployShopTool {
+    description "Instalacion de ShopTool"
     doLast {
         println "************************************************************************************"
+        println "directorio ssh $defaulSshKeyFile"
         println "comando ssh  ${config['server.user']}@${config['server.host']}:${config['server.port']}"
-
-
 
         remoteSession {
             host = config['server.host']
             user = config['server.user']
             port = config['server.port']
 
-            def result = exec(command: 'gem sources -l', failOnError: false, showOutput: true)
-            def containsNexusSources = false
-            result.output.eachLine { line ->
-                if (line.contains('https://rubygems.org/')) {
-                    exec "gem source -r https://rubygems.org/"
+            def result = exec(command: '[ -f /lib/systemd/system/shoptool.service ] && echo "Found" || echo "Not found"'
+                               , failOnError: false, showOutput: true)
+            if (result.exitStatus == 1) {
+              result.output.eachLine { line ->
+                if (line.contains('Not found')) {
+                  exec "useradd shoptool -s /sbin/nologin -M"
+                  scp {
+                    from { localFile "gradle/shoptool.service" }
+                    into { remoteFile '/lib/systemd/system/shoptool.service' }
+                  }
+                  exec "chmod 755 /lib/systemd/system/shoptool.service"
+                  exec "systemctl enable shoptool.service"
                 }
-                if (line.contains("${config['repositoryRuby']}")) {
-                    containsNexusSources = true
+                scp {
+                  from { localDir "build/" }
+                  into { remoteDir '/home/shoptool' }
                 }
+                exec "systemctl restart shoptool.service"
+              }
             }
-            if (!containsNexusSources) {
-                exec "gem source -a ${config['repositoryRuby']}"
-                exec "gem sources -l"
-            }
-
-            gemas.each { gem ->
-                exec "gem uninstall $gem"
-                exec "gem install $gem"
-                exec "gem list"
-            }
-
         }
     }
 }
+
+deployShopTool.dependsOn build
+
+

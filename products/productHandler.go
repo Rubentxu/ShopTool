@@ -134,7 +134,7 @@ func NewHandler(dbURL string) (*Handler, error) {
 	h.Handle("/api/product/command/characteristic/add", httputils.CommandHandler(loggingHandler, domain.AddCharacteristicCommand))
 	h.Handle("/api/product/command/characteristic/update", httputils.CommandHandler(loggingHandler, domain.UpdateCharacteristicCommand))
 	h.Handle("/api/product/command/characteristic/remove", httputils.CommandHandler(loggingHandler, domain.RemoveCharacteristicCommand))
-	h.Handle("/api/product/docs/", http.StripPrefix("/api/product/docs/", http.FileServer(http.Dir("swagger-ui/"))))
+	h.Handle("/api/product/docs/", http.StripPrefix("/api/product/docs/", http.FileServer(http.Dir("public/"))))
 
 	logger := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Println(r.Method, r.URL)

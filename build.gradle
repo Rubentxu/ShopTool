@@ -3,45 +3,40 @@ buildscript {
     ext.config = propiedadesDeEntorno()
 
     repositories {
-      //  jcenter { url "http://jcenter.bintray.com/" }
         maven { url config['repositoryCentral'] }
     }
 
     dependencies {
         classpath 'com.aestasit.infrastructure.sshoogr:sshoogr-gradle:0.9.18'
-        classpath group: 'com.github.spullara.mustache.java', name: 'compiler', version: '0.9.5'
     }
 
 }
 
-//plugins {
-//    id 'com.github.blindpirate.gogradle' version '0.7.0'
-//}
-
-apply plugin: 'java'
+plugins {
+   id 'com.github.blindpirate.gogradle' version '0.7.0'
+}
 apply plugin: 'secureShell'
-//apply from: 'gradle/configService.gradle'
-// apply from: 'gradle/deploy.gradle'
+apply from: 'gradle/deploy.gradle'
 
-//golang {
-//    packagePath = 'ShopTool'
-//}
-
+golang {
+    packagePath = 'ShopTool'
+}
 
 
-//repositories {
-    //golang {
-      //  root ~/github\.com\/[\w-]+\/[\w-]+/
-        //url { path ->
-          //  def split = path.split('/')
-          //  "https://github.com/${split[1]}/${split[2]}"
-       // }
+
+repositories {
+    golang {
+        root ~/github\.com\/[\w-]+\/[\w-]+/
+        url { path ->
+            def split = path.split('/')
+            "https://github.com/${split[1]}/${split[2]}"
+        }
     }
-   // golang {
-     //   root ~/git\.apache\.org\/thrift\.git\/lib\/go\/thrift/
-       // url "https://github.com/apache/thrift/tree/master/lib/go/thrift/"
-   // }
-//}
+    golang {
+        root ~/git\.apache\.org\/thrift\.git\/lib\/go\/thrift/
+        url "https://github.com/apache/thrift/tree/master/lib/go/thrift/"
+    }
+}
 
 version '0.0.1'
 
@@ -65,15 +60,25 @@ if( env == 'prod') {
     targets = ['linux-amd64', 'windows-amd64', 'darwin-amd64']
 }
 
-task copyProperties(type: Copy) {
-    description = "Copy Dockerfile and required data to build directory"
-    from 'application.yml'
-    into { "${buildDir}" }
-}
 
 build {
-    targetPlatform = targets
-    go 'build -o ./build/ShopTool_${GOOS}_${GOARCH}${GOEXE} ./'
+     exec {
+         commandLine 'rm', '-fr', '-R', "${buildDir}"
+     }
+     copy {
+         from 'application.yml'
+         into { "${buildDir}" }
+     }
+     copy {
+         from "${rootDir}/products/public"
+         into { "${buildDir}/public" }
+     }
+
+     exec {
+          workingDir  "${buildDir}"
+          commandLine 'mkdir', 'images'
+     }
+     targetPlatform = targets
+     go 'build -o ./build/ShopTool_${GOOS}_${GOARCH}${GOEXE} ./'
+
 }
-//build.dependsOn check
-build.dependsOn copyProperties
