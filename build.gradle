@@ -3,6 +3,7 @@ buildscript {
     ext.config = propiedadesDeEntorno()
 
     repositories {
+        mavenCentral()
         maven { url config['repositoryCentral'] }
     }
 

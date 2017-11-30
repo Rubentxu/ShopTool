@@ -3,10 +3,11 @@ environments {
         repositoryCentral = "http://172.26.215.154:31006/repository/industrializacion-maven-group/"
 
         server {
-            host = '-'
-            port = 0
-            fileRsa = '-'
-            user = '-'
+            host = '52.174.123.255'
+            port = 22
+            fileRsa = 'terraform_rsa'
+            user = 'rubentxu'
+            passPhrase = 'cabrera'
         }
 
     }
@@ -19,6 +20,7 @@ environments {
             port = 0
             fileRsa = '-'
             user = '-'
+            passPhrase = '-'
         }
 
 
@@ -29,10 +31,11 @@ environments {
         repositoryCentral = "http://rm.sva.itbatera.ejgv.eus:8081/repository/industrializacion-maven-group/"
 
         server {
-            host = 'v99srh-000277.mbkudea.ejgv.eus'
+            host = '-'
             port = 22
-            fileRsa = 'vrorun_id_rsa'
-            user = 'vrorun'
+            fileRsa = '-'
+            user = '-'
+            passPhrase = '-'
         }
 
 

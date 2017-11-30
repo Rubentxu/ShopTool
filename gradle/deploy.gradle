@@ -3,9 +3,10 @@ def defaulSshKeyFile = "${System.properties['user.home']}/.ssh/${config['server.
 sshOptions {
     trustUnknownHosts = true
     verbose = true
-    defaultPassword = ""
+    defaultPassword = "cabrera"
     defaultKeyFile = new File(defaulSshKeyFile)
-    defaultPassPhrase = ""
+    defaultPassPhrase  = "cabrera"
+
 
     execOptions {
         showOutput = true
@@ -27,25 +28,32 @@ task deployShopTool {
             host = config['server.host']
             user = config['server.user']
             port = config['server.port']
+            passPhrase = config['server.passPhrase']
 
             def result = exec(command: '[ -f /lib/systemd/system/shoptool.service ] && echo "Found" || echo "Not found"'
                                , failOnError: false, showOutput: true)
-            if (result.exitStatus == 1) {
+            println "result $result.exitStatus"
+            if (result.exitStatus == 0) {
               result.output.eachLine { line ->
+
                 if (line.contains('Not found')) {
-                  exec "useradd shoptool -s /sbin/nologin -M"
-                  scp {
-                    from { localFile "gradle/shoptool.service" }
-                    into { remoteFile '/lib/systemd/system/shoptool.service' }
-                  }
-                  exec "chmod 755 /lib/systemd/system/shoptool.service"
-                  exec "systemctl enable shoptool.service"
-                }
+
+                     exec "sudo useradd shoptool -s /sbin/nologin -M"
+                     scp {
+                        from { localFile "gradle/shoptool.service" }
+                        into { remoteFile '/home/rubentxu/shoptool.service' }
+                     }
+                     exec "sudo mv /home/rubentxu/shoptool.service /lib/systemd/system/shoptool.service"
+                     exec "sudo chmod 755 /lib/systemd/system/shoptool.service"
+                     exec "sudo systemctl enable shoptool.service"
+                   }
+
                 scp {
                   from { localDir "build/" }
-                  into { remoteDir '/home/shoptool' }
+                  into { remoteDir '/home/rubentxu/' }
                 }
-                exec "systemctl restart shoptool.service"
+                exec "sudo chmod 750 /home/rubentxu/ShopTool_linux_amd64"
+                exec "sudo systemctl restart shoptool.service"
               }
             }
         }
