@@ -59,8 +59,15 @@ func main() {
 	}
 	fmt.Printf("server address %s\n", config.serverAddr())
 	fmt.Printf("mongo address %s\n", config.mongoAddr())
-	h, _ := prod.NewHandler(config.mongoAddr())
+	h, err := prod.NewHandler(config.mongoAddr())
+	if err != nil { // Handle errors reading the config file
+		panic(err)
+	}
 
-	logger.Log(http.ListenAndServe(config.serverAddr(), h))
+	err = http.ListenAndServe(config.serverAddr(), h)
+	if err != nil { // Handle errors reading the config file
+		panic(err)
+	}
+	fmt.Printf("Cerrando aplicacion, hasta otra!!!")
 
 }

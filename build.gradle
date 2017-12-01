@@ -83,3 +83,15 @@ build {
      go 'build -o ./build/ShopTool_${GOOS}_${GOARCH}${GOEXE} ./'
 
 }
+
+
+task replaceTokens << {
+     ant.replaceregexp(match:'@URLDOCS@', replace: "http://${config['server.host']}:8081/api/product/docs/swagger-product.yaml", flags:'g', byline:true) {
+            fileset(dir: "${buildDir}/public", includes: 'index.html')
+     }
+     ant.replaceregexp(match:'@URLBASE@', replace: "${config['server.host']}:8081", flags:'g', byline:true) {
+            fileset(dir: "${buildDir}/public", includes: 'swagger-product.yaml')
+     }
+
+}
+build.dependsOn replaceTokens

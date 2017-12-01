@@ -38,22 +38,28 @@ task deployShopTool {
 
                 if (line.contains('Not found')) {
 
-                     exec "sudo useradd shoptool -s /sbin/nologin -M"
+                     exec "sudo useradd shoptool -m -s /sbin/nologin -G rubentxu"
+
                      scp {
                         from { localFile "gradle/shoptool.service" }
-                        into { remoteFile '/home/rubentxu/shoptool.service' }
+                        into { remoteFile '/tmp/shoptool.service' }
                      }
-                     exec "sudo mv /home/rubentxu/shoptool.service /lib/systemd/system/shoptool.service"
+                     exec "sudo mv /tmp/shoptool.service /lib/systemd/system/shoptool.service"
                      exec "sudo chmod 755 /lib/systemd/system/shoptool.service"
                      exec "sudo systemctl enable shoptool.service"
-                   }
+                }
 
+                exec "sudo systemctl stop shoptool.service"
+                exec "sudo rm -fr /home/shoptool/*"
+                exec "sudo chown -R shoptool:rubentxu /home/shoptool"
                 scp {
                   from { localDir "build/" }
-                  into { remoteDir '/home/rubentxu/' }
+                  into { remoteDir '/home/shoptool/' }
                 }
-                exec "sudo chmod 750 /home/rubentxu/ShopTool_linux_amd64"
-                exec "sudo systemctl restart shoptool.service"
+
+                exec "sudo chmod 770 /home/shoptool"
+                exec "sudo chmod 750 /home/shoptool/ShopTool_linux_amd64"
+                exec "sudo systemctl start shoptool.service"
               }
             }
         }
