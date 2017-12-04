@@ -241,6 +241,7 @@ func EventBusHandler(eventPublisher eh.EventPublisher) http.Handler {
 	})
 
 }
+
 func AddImageHandler(commandHandler eh.CommandHandler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if r.Method != "POST" {
