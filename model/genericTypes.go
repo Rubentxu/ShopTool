@@ -1,10 +1,9 @@
 package model
 
 import (
-	"github.com/looplab/eventhorizon"
 	"image/color"
-	"time"
 	"net/url"
+	"time"
 )
 
 type Thing struct {
@@ -250,56 +249,53 @@ type Place struct {
 }
 
 type User struct {
-
 }
 
 type DeliveryEvent struct {
-	AccessCode string
-	AvailableFrom time.Time
-	AvailableThrough time.Time
+	AccessCode        string
+	AvailableFrom     time.Time
+	AvailableThrough  time.Time
 	HasDeliveryMethod DeliveryMethod
 }
 
 type ParcelDelivery struct {
-	DeliveryAddress PostalAddress
-	DeliveryStatus DeliveryEvent
-	ExpectedArrivalFrom time.Time
+	DeliveryAddress      PostalAddress
+	DeliveryStatus       DeliveryEvent
+	ExpectedArrivalFrom  time.Time
 	ExpectedArrivalUntil time.Time
-	HasDeliveryMethod DeliveryMethod
-	ItemShipped ProductId
-	OriginalAddress PostalAddress
-	PartOfOrder Order
-	Provider OrganizationId
-	TrackingNumber string
-	TrackingUrl url.URL
-
+	HasDeliveryMethod    DeliveryMethod
+	ItemShipped          ProductId
+	OriginalAddress      PostalAddress
+	PartOfOrder          Order
+	Provider             OrganizationId
+	TrackingNumber       string
+	TrackingUrl          url.URL
 }
 
 type OrderStatus int
 
 type OrderItem struct {
-	OrderDelivery ParcelDelivery
+	OrderDelivery   ParcelDelivery
 	OrderItemNumber string
 	OrderItemStatus OrderStatus
-	OrderQuantity int
-	OrderedItem ProductId
+	OrderQuantity   int
+	OrderedItem     ProductId
 }
 
 type Order struct {
 	Thing
-	AcceptedOffer Offer
-	BillingAddress PostalAddress
-	Broker OrganizationId
+	AcceptedOffer      Offer
+	BillingAddress     PostalAddress
+	Broker             OrganizationId
 	ConfirmationNumber string
-	Customer User
-	Discount int
-	DiscountCode string
-	DiscountCurrency string
-	IsGift bool
-	OrderDate time.Time
-	OrderDelivery ParcelDelivery
-	OrderNumber string
+	Customer           User
+	Discount           int
+	DiscountCode       string
+	DiscountCurrency   string
+	IsGift             bool
+	OrderDate          time.Time
+	OrderDelivery      ParcelDelivery
+	OrderNumber        string
 	OrderStatus
 	OrderedItem OrderItem
 }
-
